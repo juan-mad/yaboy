@@ -58,6 +58,51 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				}
 				buf = append(buf, bindata...)
 				break
+			case "LDH":
+				var inp string
+				if len(chunks) == 3 {
+					inp = chunks[1] + chunks[2]
+				} else if len(chunks) == 2 {
+					inp = chunks[1]
+				} else {
+					panic(fmt.Sprintf("Unexpected split of input line: %s\n", line))
+				}
+				bindata, err := encodeLoadH(inp)
+				if err != nil {
+					return err
+				}
+				buf = append(buf, bindata...)
+				break
+			case "INC":
+				if len(chunks) != 2 {
+					panic(fmt.Sprintf("Unexpected split of input line: %s\n", line))
+				}
+				bindata, err := encodeIncrement(chunks[1])
+				if err != nil {
+					return err
+				}
+				buf = append(buf, bindata...)
+				break
+			case "PUSH":
+				if len(chunks) != 2 {
+					panic(fmt.Sprintf("Unexpected split of input line: %s\n", line))
+				}
+				bindata, err := encodePush(chunks[1])
+				if err != nil {
+					return err
+				}
+				buf = append(buf, bindata...)
+				break
+			case "POP":
+				if len(chunks) != 2 {
+					panic(fmt.Sprintf("Unexpected split of input line: %s\n", line))
+				}
+				bindata, err := encodePush(chunks[1])
+				if err != nil {
+					return err
+				}
+				buf = append(buf, bindata...)
+				break
 			}
 		}
 	}
