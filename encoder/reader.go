@@ -1,4 +1,4 @@
-package decoder
+package encoder
 
 import "os"
 import "io"
@@ -30,3 +30,4 @@ func ReadBinaryFile(inputPath string) ([]uint8, error) {
 
 	return data, nil
 }
+
