@@ -50,7 +50,7 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				} else if len(chunks) == 2 {
 					inp = chunks[1]
 				} else {
-					panic(fmt.Sprintf("Unexpected split of input line: %s\n", line))
+					 return fmt.Errorf("Unexpected split of input line: %s\n", line)
 				}
 				bindata, err := encodeLoad(inp)
 				if err != nil {
@@ -65,7 +65,7 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				} else if len(chunks) == 2 {
 					inp = chunks[1]
 				} else {
-					panic(fmt.Sprintf("Unexpected split of input line: %s\n", line))
+					return fmt.Errorf("Unexpected split of input line: %s\n", line)
 				}
 				bindata, err := encodeLoadH(inp)
 				if err != nil {
@@ -75,7 +75,7 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				break
 			case "INC":
 				if len(chunks) != 2 {
-					panic(fmt.Sprintf("Unexpected split of input line: %s\n", line))
+					return fmt.Errorf("Unexpected split of input line: %s\n", line)
 				}
 				bindata, err := encodeIncrement(chunks[1])
 				if err != nil {
@@ -85,7 +85,7 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				break
 			case "PUSH":
 				if len(chunks) != 2 {
-					panic(fmt.Sprintf("Unexpected split of input line: %s\n", line))
+					return fmt.Errorf("Unexpected split of input line: %s\n", line)
 				}
 				bindata, err := encodePush(chunks[1])
 				if err != nil {
@@ -95,7 +95,7 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				break
 			case "POP":
 				if len(chunks) != 2 {
-					panic(fmt.Sprintf("Unexpected split of input line: %s\n", line))
+					return fmt.Errorf("Unexpected split of input line: %s\n", line)
 				}
 				bindata, err := encodePush(chunks[1])
 				if err != nil {
@@ -103,6 +103,21 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				}
 				buf = append(buf, bindata...)
 				break
+			case "NOP", "STOP", "HALT", "PREFIX", "EI", "DI":
+				if len(chunks) > 2 {
+					return fmt.Errorf("Unexpected split of input line: %s\n", line)
+				}
+				bindata, err := encodeMisc(chunks)
+				if err != nil {
+					return err
+				}
+				buf = append(buf, bindata...)
+				break
+			case "ADD", "ADC", "SUB", "SBC", "AND", "XOR", "OR", "CP":
+				if len(chunks) < 2 && len(chunks) > 3 {
+					return fmt.Errorf("Unexpected split of input line: %s\n", line)
+				}
+				bindata, err := encode8bitArithmetic(chunks)
 			}
 		}
 	}
