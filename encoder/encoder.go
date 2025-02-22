@@ -40,6 +40,21 @@ var REGMAPPER = map[string]uint8{
 	"AF": 3,
 }
 
+var ALUMAPPER = map[string]uint8 {
+	"ADD": 0,
+	"ADC": 1,
+	"SUB": 2,
+	"SBC": 3,
+	"AND": 4,
+	"XOR": 5,
+	"OR": 6,
+	"CP": 7,
+	"INC": 4,
+	"DEC": 5,
+}
+
+var ALUUNARYOP = []string{"DAA", "SCF", "CPL", "CCF",}
+
 // IsPrefix checks that a string represents one of the prefixes
 func IsPrefix(s string) bool {
 	return slices.Contains(PREFIXES, s)
@@ -284,10 +299,67 @@ func encodeMisc(chunks []string) ([]uint8, error) {
 }
 func encode8bitArithmetic(chunks []string) ([]uint8, error) {
 	var opcode uint8
+	var instr string = chunks[0]
+	var leftop, rightop string
+	
+	// check that chunks has 1, 2, or 3 elements
+	if len(chunks) < 1 || len(chunks) > 4 {
+		return []uint8{}, fmt.Errorf("Unexpected number of arguments: %s", chunks)
+	}
+	// if 3 elems but first operand is not A, error
+	if len(chunks) == 3 && chunks[1] != "A" {
+		return []uint8{}, fmt.Errorf("Invalid 8bit ALU operation, A register must be first operand: %s", chunks)
+	}
 
-	args := strings.Split(strings.ReplaceAll(strings.TrimSpace(argStr), " ", ""), ",")
-	if len(args) != 2 {
-		return []uint8{}, fmt.Errorf("could not parse LDH arguments, expected only one `,`: %s", argStr)
+	// if only one element, it must be an instruction with no operands
+	if len(chunks) == 1 {
+		if !slices.Contains(ALUUNARYOP, instr) {
+			return []uint8{}, fmt.Errorf("Invalid %s instruction with no operands", instr)
+		}
+		switch instr {
+			case "DAA":
+				return []uint8{0x27}, nil
+			case "SCF":
+				return []uint8{0x37}, nil
+			case "CPL":
+				return []uint8{0x2F}, nil
+			case "CCF":
+				return []uint8{0x3F}, nil
+		}
+	}
+
+	// if more than one element, check that it has no operands, or error
+	if slices.Contains(ALUUNARYOP, instr) {
+		return []uint8{}, fmt.Errorf("Invalid instruction %s with operands: %s", instr, chunks[1:])
+	}
+
+	// INC and DEC instructions that take exactly one arguments
+	if len(chunks) == 2 && (instr == "INC" || instr == "DEC") {
+		if !Is8BitRegister(chunks[1]) {
+			return []uint8{}, fmt.Errorf("Invalid instruction %s with no 8bit reg: %s", instr, chunks[1])
+		}
+		opcode = (REGMAPPER[chunks[1]] << 3) | ALUMAPPER[instr]
+		return []uint8{opcode}, nil
+	}
+	
+	// rest of operations may ommit A as first operand, we just want the second one
+	rightop = chunks[len(chunks)-1]
+
+	// operation between operands
+	if Is8BitRegister(rightop) {
+		 opcode = (2 << 6) | (ALUMAPPER[instr] << 3) | REGMAPPER[rightop]
+		 return []uint8{opcode}, nil
+	} else {
+		opcode = (3 << 6) | ALUMAPPER[instr] | 6
+		if !(rightop[:2] == "0x" && len(rightop) >= 3 && len(rightop) <= 4) {
+			return []uint8{}, fmt.Errorf("Invalid arguments passed: %s", chunks)
+		}
+		nn, err := strconv.ParseUint(rightop[2:], 16, 8)
+		n := uint16(nn)
+		if err != nil {
+			return []uint8{}, fmt.Errorf("Could not parse immediate 8bit hex value %s: %w", rightop, err)
+		}
+		return []uint8{opcode, uint8(n)}, nil
 	}
 }
 
