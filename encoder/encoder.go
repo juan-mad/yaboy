@@ -83,22 +83,22 @@ func encodeLoadH(argStr string) ([]uint8, error) {
 	if args[0] == "A" {
 		if args[1][:2] == "0x" && len(args[1]) >= 3 && len(args[1]) <= 4 {
 			nn, err := strconv.ParseUint(args[1][2:], 16, 8)
-			n := uint16(nn)
+			n := uint8(nn)
 			if err != nil {
 				return []uint8{}, fmt.Errorf("Could not parse immediate 8bit hex value %s: %w", args[1], err)
 			}
-			return []uint8{0xF0, uint8(n)}, nil
+			return []uint8{0xF0, n}, nil
 		}
 	}
 
 	if args[1] == "A" {
 		if args[0][:2] == "0x" && len(args[0]) >= 3 && len(args[0]) <= 4 {
 			nn, err := strconv.ParseUint(args[0][2:], 16, 8)
-			n := uint16(nn)
+			n := uint8(nn)
 			if err != nil {
 				return []uint8{}, fmt.Errorf("Could not parse immediate 8bit hex value %s: %w", args[0], err)
 			}
-			return []uint8{0xE0, uint8(n)}, nil
+			return []uint8{0xE0, n}, nil
 		}
 	}
 
@@ -218,22 +218,6 @@ func encodeLoad(argStr string) ([]uint8, error) {
 	return []uint8{}, fmt.Errorf("Not implemented load instruction: LD %s", argStr)
 }
 
-// encodeIncrement produces the bytes for the INC instructions
-func encodeIncrement(argStr string) ([]uint8, error) {
-	var opcode uint8
-
-	if Is8BitRegister(argStr) {
-		opcode = 0b00000100 | (REGMAPPER[argStr] << 3)
-		return []uint8{opcode}, nil
-	}
-
-	if slices.Contains(REGP, argStr) {
-		opcode = 0b0000011 | (REGMAPPER[argStr] << 4)
-	}
-	
-	return []uint8{}, fmt.Errorf("Invalid increment instruction: INC %s", argStr)
-}
-
 // encodePush produces the bytes for the PUSH instructions
 func encodePush(argStr string) ([]uint8, error) {
 	var opcode uint8
@@ -270,11 +254,11 @@ func encodeMisc(chunks []string) ([]uint8, error) {
 			return []uint8{}, fmt.Errorf("Invalid arguments passed: %s", chunks[0]+","+chunks[1])
 		}
 		nn, err := strconv.ParseUint(chunks[1][2:], 16, 8)
-		n := uint16(nn)
+		n := uint8(nn)
 		if err != nil {
 			return []uint8{}, fmt.Errorf("Could not parse immediate 8bit hex value %s: %w", chunks[1], err)
 		}
-		return []uint8{0x10, uint8(n)}, nil
+		return []uint8{0x10, n}, nil
 		// case "NOP", "STOP", "HALT", "PREFIX", "EI", "DI":
 	}
 
@@ -295,12 +279,12 @@ func encodeMisc(chunks []string) ([]uint8, error) {
 	}
 
 
-	return []uint8{}, fmt.Errorf("Invalid push instruction: ", chunks)
+	return []uint8{}, fmt.Errorf("Invalid push instruction: %s", chunks)
 }
-func encode8bitArithmetic(chunks []string) ([]uint8, error) {
+func encodeBitArithmetic(chunks []string) ([]uint8, error) {
 	var opcode uint8
 	var instr string = chunks[0]
-	var leftop, rightop string
+	var rightop string
 	
 	// check that chunks has 1, 2, or 3 elements
 	if len(chunks) < 1 || len(chunks) > 4 {
@@ -334,12 +318,37 @@ func encode8bitArithmetic(chunks []string) ([]uint8, error) {
 	}
 
 	// INC and DEC instructions that take exactly one arguments
-	if len(chunks) == 2 && (instr == "INC" || instr == "DEC") {
-		if !Is8BitRegister(chunks[1]) {
-			return []uint8{}, fmt.Errorf("Invalid instruction %s with no 8bit reg: %s", instr, chunks[1])
+	if len(chunks) == 2 && (instr == "INC" || instr == "DEC" || instr == "ADD") {
+		if Is8BitRegister(chunks[1]) {
+			opcode = (REGMAPPER[chunks[1]] << 3) | ALUMAPPER[instr]
+			return []uint8{opcode}, nil
+			// return []uint8{}, fmt.Errorf("Invalid instruction %s with no 8bit reg: %s", instr, chunks[1])
+		} else if slices.Contains(REGP, chunks[1]) {
+			if instr == "INC" {
+				opcode = (REGMAPPER[chunks[1]] << 4) | 0x3
+			} else if instr == "DEC" { // DEC
+				opcode = (REGMAPPER[chunks[1]] << 4) | 0xB
+			} else { // ADD
+				opcode = (REGMAPPER[chunks[1]] << 4) | 0x9
+			}
+			return []uint8{opcode}, nil
 		}
-		opcode = (REGMAPPER[chunks[1]] << 3) | ALUMAPPER[instr]
-		return []uint8{opcode}, nil
+	}
+	if len(chunks) == 3 && instr == "ADD" && chunks[1] == "SP" {
+		if !(chunks[2][:2] == "0x" && len(chunks[2]) >= 3 && len(chunks[2]) <= 4) {
+			return []uint8{}, fmt.Errorf("Invalid ADD argument: %s", chunks)
+		}
+		nn, err := strconv.ParseInt(rightop[2:], 16, 8)
+		n := uint8(nn)
+		if err != nil {
+			return []uint8{}, fmt.Errorf("Could not parse immediate 8bit hex value %s: %w", rightop, err)
+		}
+		return []uint8{0xE8, n}, nil
+	}
+
+	// at this point, there should be no DEC or INC
+	if instr == "DEC" || instr == "INC" {
+		return []uint8{}, fmt.Errorf("Invalid %s instruction: %s", instr, chunks)
 	}
 	
 	// rest of operations may ommit A as first operand, we just want the second one
@@ -350,16 +359,16 @@ func encode8bitArithmetic(chunks []string) ([]uint8, error) {
 		 opcode = (2 << 6) | (ALUMAPPER[instr] << 3) | REGMAPPER[rightop]
 		 return []uint8{opcode}, nil
 	} else {
-		opcode = (3 << 6) | ALUMAPPER[instr] | 6
+		opcode = (3 << 6) | ALUMAPPER[instr] | 0x6
 		if !(rightop[:2] == "0x" && len(rightop) >= 3 && len(rightop) <= 4) {
 			return []uint8{}, fmt.Errorf("Invalid arguments passed: %s", chunks)
 		}
 		nn, err := strconv.ParseUint(rightop[2:], 16, 8)
-		n := uint16(nn)
+		n := uint8(nn)
 		if err != nil {
 			return []uint8{}, fmt.Errorf("Could not parse immediate 8bit hex value %s: %w", rightop, err)
 		}
-		return []uint8{opcode, uint8(n)}, nil
+		return []uint8{opcode, n}, nil
 	}
 }
 
