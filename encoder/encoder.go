@@ -3,8 +3,8 @@ package encoder
 import (
 	"fmt"
 	"slices"
-	"strings"
 	"strconv"
+	"strings"
 )
 
 // MSB returns the Most Significant Bits of an unsigned 16bit value as unsigned 8bit value
@@ -33,33 +33,33 @@ var REGMAPPER = map[string]uint8{
 	"L":    5,
 	"[HL]": 6,
 	"A":    7,
-	"BC": 0,
-	"DE": 1,
-	"HL": 2,
-	"SP": 3,
-	"AF": 3,
+	"BC":   0,
+	"DE":   1,
+	"HL":   2,
+	"SP":   3,
+	"AF":   3,
 }
 
-var ALUMAPPER = map[string]uint8 {
+var ALUMAPPER = map[string]uint8{
 	"ADD": 0,
 	"ADC": 1,
 	"SUB": 2,
 	"SBC": 3,
 	"AND": 4,
 	"XOR": 5,
-	"OR": 6,
-	"CP": 7,
+	"OR":  6,
+	"CP":  7,
 	"INC": 4,
 	"DEC": 5,
 }
 
-var ALUUNARYOP = []string{"DAA", "SCF", "CPL", "CCF",}
+var ALUUNARYOP = []string{"DAA", "SCF", "CPL", "CCF"}
 var FLAGS = []string{"NZ", "Z", "NC", "C"}
-var FLAGMAPPER = map[string]uint8 {
+var FLAGMAPPER = map[string]uint8{
 	"NZ": 0,
-	"Z": 1,
+	"Z":  1,
 	"NC": 2,
-	"C": 3,
+	"C":  3,
 }
 
 // IsPrefix checks that a string represents one of the prefixes
@@ -140,7 +140,7 @@ func encodeLoad(argStr string) ([]uint8, error) {
 			if err != nil {
 				return []uint8{}, fmt.Errorf("Could not parse immediate 16bit hex value %s: %w", args[1], err)
 			}
-			opcode = REGMAPPER[args[0]] << 3 | 0b110
+			opcode = REGMAPPER[args[0]]<<3 | 0b110
 			// little endian order, LSB before MSB
 			return []uint8{opcode, LSB(n), MSB(n)}, nil
 		}
@@ -183,7 +183,7 @@ func encodeLoad(argStr string) ([]uint8, error) {
 			if err != nil {
 				return []uint8{}, fmt.Errorf("Could not parse immediate 8bit hex value %s: %w", args[1], err)
 			}
-			opcode = REGMAPPER[args[0]] << 3 | 0b110
+			opcode = REGMAPPER[args[0]]<<3 | 0b110
 			return []uint8{opcode, uint8(n)}, nil
 		}
 	}
@@ -199,7 +199,7 @@ func encodeLoad(argStr string) ([]uint8, error) {
 		}
 		return []uint8{0xF8, uint8(n)}, nil
 	}
-	
+
 	arg := args[0] + "," + args[1]
 	switch arg {
 	case "[BC],A":
@@ -250,7 +250,7 @@ func encodePop(argStr string) ([]uint8, error) {
 // encodeMisc produces the bytes for miscellaneous instructions
 // in particular, STOP, HALT, PREFIX, NOP, EI, DEI
 func encodeMisc(chunks []string) ([]uint8, error) {
-	if len(chunks) > 2  || len(chunks) == 0 {
+	if len(chunks) > 2 || len(chunks) == 0 {
 		return []uint8{}, fmt.Errorf("chunks argument must have length 1 or 2, found %d", len(chunks))
 	}
 	if len(chunks) == 2 {
@@ -271,20 +271,19 @@ func encodeMisc(chunks []string) ([]uint8, error) {
 
 	instrStr := chunks[0]
 	switch instrStr {
-		case "NOP":
-			return []uint8{0x00}, nil
-		case "STOP":
-			return []uint8{0x10}, nil
-		case "HALT":
-			return []uint8{0x76}, nil
-		case "PREFIX":
-			return []uint8{0xCB}, nil
-		case "DI":
-			return []uint8{0xF3}, nil
-		case "EI":
-			return []uint8{0xFB}, nil
+	case "NOP":
+		return []uint8{0x00}, nil
+	case "STOP":
+		return []uint8{0x10}, nil
+	case "HALT":
+		return []uint8{0x76}, nil
+	case "PREFIX":
+		return []uint8{0xCB}, nil
+	case "DI":
+		return []uint8{0xF3}, nil
+	case "EI":
+		return []uint8{0xFB}, nil
 	}
-
 
 	return []uint8{}, fmt.Errorf("Invalid push instruction: %s", chunks)
 }
@@ -294,7 +293,7 @@ func encodeBitArithmetic(chunks []string) ([]uint8, error) {
 	var opcode uint8
 	var instr string = chunks[0]
 	var rightop string
-	
+
 	// check that chunks has 1, 2, or 3 elements
 	if len(chunks) < 1 || len(chunks) > 4 {
 		return []uint8{}, fmt.Errorf("Unexpected number of arguments: %s", chunks)
@@ -310,14 +309,14 @@ func encodeBitArithmetic(chunks []string) ([]uint8, error) {
 			return []uint8{}, fmt.Errorf("Invalid %s instruction with no operands", instr)
 		}
 		switch instr {
-			case "DAA":
-				return []uint8{0x27}, nil
-			case "SCF":
-				return []uint8{0x37}, nil
-			case "CPL":
-				return []uint8{0x2F}, nil
-			case "CCF":
-				return []uint8{0x3F}, nil
+		case "DAA":
+			return []uint8{0x27}, nil
+		case "SCF":
+			return []uint8{0x37}, nil
+		case "CPL":
+			return []uint8{0x2F}, nil
+		case "CCF":
+			return []uint8{0x3F}, nil
 		}
 	}
 
@@ -359,14 +358,14 @@ func encodeBitArithmetic(chunks []string) ([]uint8, error) {
 	if instr == "DEC" || instr == "INC" {
 		return []uint8{}, fmt.Errorf("Invalid %s instruction: %s", instr, chunks)
 	}
-	
+
 	// rest of operations may ommit A as first operand, we just want the second one
 	rightop = chunks[len(chunks)-1]
 
 	// operation between operands
 	if Is8BitRegister(rightop) {
-		 opcode = (2 << 6) | (ALUMAPPER[instr] << 3) | REGMAPPER[rightop]
-		 return []uint8{opcode}, nil
+		opcode = (2 << 6) | (ALUMAPPER[instr] << 3) | REGMAPPER[rightop]
+		return []uint8{opcode}, nil
 	} else {
 		opcode = (3 << 6) | ALUMAPPER[instr] | 0x6
 		if !(rightop[:2] == "0x" && len(rightop) >= 3 && len(rightop) <= 4) {
@@ -389,11 +388,11 @@ func encodeRelativeJump(argStr string) ([]uint8, error) {
 		return []uint8{}, fmt.Errorf("could not parse JR arguments: %s", argStr)
 	}
 
-	hexStr := args[len(args) - 1]
+	hexStr := args[len(args)-1]
 	if !(hexStr[:2] == "0x" && len(hexStr) >= 3 && len(hexStr) <= 4) {
 		return []uint8{}, fmt.Errorf("Invalid arguments passed: %s", argStr)
 	}
-	nn, err := strconv.ParseUint(args[0], 16, 8)
+	nn, err := strconv.ParseUint(hexStr[2:], 16, 8)
 	n := uint8(nn)
 	if err != nil {
 		return []uint8{}, fmt.Errorf("Could not parse immediate 8bit hex value %s: %w", argStr, err)
@@ -422,11 +421,11 @@ func encodeJump(argStr string) ([]uint8, error) {
 		}
 	}
 
-	hexStr := args[len(args) - 1]
+	hexStr := args[len(args)-1]
 	if !(hexStr[:2] == "0x" && len(hexStr) >= 3 && len(hexStr) <= 4) {
 		return []uint8{}, fmt.Errorf("Invalid arguments passed: %s", argStr)
 	}
-	nn, err := strconv.ParseUint(args[0], 16, 8)
+	nn, err := strconv.ParseUint(hexStr[2:], 16, 8)
 	n := uint8(nn)
 	if err != nil {
 		return []uint8{}, fmt.Errorf("Could not parse immediate 8bit hex value %s: %w", argStr, err)
@@ -439,9 +438,122 @@ func encodeJump(argStr string) ([]uint8, error) {
 	if !slices.Contains(FLAGS, args[1]) {
 		return []uint8{}, fmt.Errorf("Invalid JP instruction: JP %s", argStr)
 	}
-	
+
 	opcode = 0b11000010 | (FLAGMAPPER[args[1]] << 3)
 	return []uint8{opcode, n}, nil
 
 }
 
+// encodeReturn produces the bytes for return instructions, RET and RETI
+func encodeReturn(chunks []string) ([]uint8, error) {
+	var opcode uint8
+	instr := chunks[0]
+	if len(chunks) > 2 {
+		return []uint8{}, fmt.Errorf("too many inputs for encodeReturn function")
+	}
+	if instr != "RET" && instr != "RETI" {
+		return []uint8{}, fmt.Errorf("invalid input for encodeReturn function: %s", chunks)
+	}
+
+	if instr == "RETI" {
+		if len(chunks) > 1 {
+			return []uint8{}, fmt.Errorf("Invalid RETI instruction, takes no operands, found: %s", chunks[1:])
+		}
+		return []uint8{0xD9}, nil
+	}
+
+	if instr == "RET" {
+		if len(chunks) == 1 {
+			return []uint8{0xC9}, nil
+		}
+
+		if !slices.Contains(FLAGS, chunks[1]) {
+			return []uint8{}, fmt.Errorf("Invalid operand for RET, not a flag: %s", chunks[1])
+		}
+
+		opcode = 0b11000000 | (FLAGMAPPER[chunks[1]] << 3)
+		return []uint8{opcode}, nil
+	}
+
+	return []uint8{}, fmt.Errorf("Unknown use of encodeReturn: %s", chunks)
+}
+
+// encodeRestart produces the bytes for restart instructions, RST
+func encodeRestart(argStr string) ([]uint8, error) {
+
+	if !(argStr[:2] == "0x" && len(argStr) >= 3 && len(argStr) <= 4) {
+		return []uint8{}, fmt.Errorf("Invalid arguments passed: %s", argStr)
+	}
+	nn, err := strconv.ParseUint(argStr, 16, 8)
+	n := uint8(nn)
+	if err != nil {
+		return []uint8{}, fmt.Errorf("Could not parse immediate 8bit hex value %s: %w", argStr, err)
+	}
+
+	switch n {
+	case 0x00:
+		return []uint8{0xC7}, nil
+	case 0x08:
+		return []uint8{0xCF}, nil
+	case 0x10:
+		return []uint8{0xD7}, nil
+	case 0x18:
+		return []uint8{0xDF}, nil
+	case 0x20:
+		return []uint8{0xE7}, nil
+	case 0x28:
+		return []uint8{0xEF}, nil
+	case 0x30:
+		return []uint8{0xF7}, nil
+	case 0x38:
+		return []uint8{0xFF}, nil
+	default:
+		return []uint8{}, fmt.Errorf("Invalid operand for RST instruction: %s", argStr)
+	}
+
+}
+
+// encodeCall produces the bytes for call instructions, CALL
+func encodeCall(argStr string) ([]uint8, error) {
+	var opcode uint8
+	args := strings.Split(strings.ReplaceAll(strings.TrimSpace(argStr), " ", ""), ",")
+	if len(args) == 0 || len(args) > 2 {
+		return []uint8{}, fmt.Errorf("could not parse JR arguments: %s", argStr)
+	}
+
+	hexStr := args[len(args)-1]
+	if !(hexStr[:2] == "0x" && len(hexStr) >= 3 && len(hexStr) <= 6) {
+		return []uint8{}, fmt.Errorf("Invalid arguments passed: %s", argStr)
+	}
+	nn, err := strconv.ParseUint(hexStr[2:], 16, 16)
+	n := uint16(nn)
+	if err != nil {
+		return []uint8{}, fmt.Errorf("Could not parse immediate 8bit hex value %s: %w", argStr, err)
+	}
+
+	if len(args) == 1 {
+		return []uint8{0xCD, LSB(n), MSB(n)}, nil
+	}
+
+	if !slices.Contains(FLAGS, args[1]) {
+		return []uint8{}, fmt.Errorf("Invalid JP instruction: JP %s", argStr)
+	}
+
+	opcode = 0b11000100 | (FLAGMAPPER[args[1]] << 3)
+	return []uint8{opcode, LSB(n), MSB(n)}, nil
+}
+
+func encodeRotateNoPrefix(instr string) ([]uint8, error) {
+	switch instr {
+	case "RLCA":
+		return []uint8{0x07}, nil
+	case "RLA":
+		return []uint8{0x17}, nil
+	case "RRCA":
+		return []uint8{0x0F}, nil
+	case "RRA":
+		return []uint8{0x1F}, nil
+	default:
+		return []uint8{}, fmt.Errorf("unknown use of encodeRotateNoPrefix: %s", instr)
+	}
+}

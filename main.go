@@ -1,10 +1,20 @@
 package main
 
 import (
-	"os"
-	enc "yaboy/encoder"
+	// "os"
+	"fmt"
+	dec "yaboy/decoder"
+	// enc "yaboy/encoder"
 )
 
+var LOAD_INPUT string = `LD B,B
+LD B,C
+LD B,D`
+
 func main() {
-	enc.EncodeTextFile(os.Args[1], os.Args[2])
+	data, err := dec.ReadBinaryFile("decoder/out.bin")
+	if err != nil {
+		fmt.Printf("%s\n", err)
+	}
+	fmt.Println(len(data))
 }

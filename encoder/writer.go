@@ -4,6 +4,7 @@ import "os"
 import "fmt"
 import "encoding/binary"
 import "bufio"
+
 import "strings"
 
 func writeDataToFile(filename string, buffer []uint8) error {
@@ -36,6 +37,7 @@ func EncodeTextFile(inputPath, outputPath string) error {
 
 	for scanner.Scan() {
 		line := scanner.Text()
+		fmt.Println(line)
 		chunks := strings.Fields(strings.TrimSpace(line))
 		if IsPrefix(chunks[0]) {
 			// TODO
@@ -50,7 +52,7 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				} else if len(chunks) == 2 {
 					inp = chunks[1]
 				} else {
-					 return fmt.Errorf("Unexpected split of input line: %s\n", line)
+					return fmt.Errorf("Unexpected split of input line: %s\n", line)
 				}
 				bindata, err := encodeLoad(inp)
 				if err != nil {
@@ -119,14 +121,62 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				} else if len(chunks) == 2 {
 					inp = chunks[1]
 				} else {
-					 return fmt.Errorf("Unexpected split of input line: %s\n", line)
+					return fmt.Errorf("Unexpected split of input line: %s\n", line)
 				}
 				bindata, err := encodeRelativeJump(inp)
 				if err != nil {
 					return err
 				}
 				buf = append(buf, bindata...)
+				break
+			case "JP":
+				var inp string
+				if len(chunks) == 3 {
+					inp = chunks[1] + chunks[2]
+				} else if len(chunks) == 2 {
+					inp = chunks[1]
+				} else {
+					return fmt.Errorf("Unexpected split of input line: %s\n", line)
+				}
+				bindata, err := encodeJump(inp)
+				if err != nil {
+					return err
+				}
+				buf = append(buf, bindata...)
+				break
+			case "RET", "RETI":
+				if len(chunks) > 2 {
+					return fmt.Errorf("Unexpected split of input line: %s\n", line)
+				}
+				bindata, err := encodeReturn(chunks)
+				if err != nil {
+					return err
+				}
+				buf = append(buf, bindata...)
+				break
+			case "RST":
+				if len(chunks) != 2 {
+					return fmt.Errorf("Unexpected split of input line: %s\n", line)
+				}
+				bindata, err := encodeRestart(chunks[1])
+				if err != nil {
+					return err
+				}
+				buf = append(buf, bindata...)
+				break
+			case "RLCA", "RLA", "RRCA", "RRA":
+				if len(chunks) != 1 {
+					return fmt.Errorf("Unexpected split of input line: %s\n", line)
+				}
+				bindata, err := encodeRotateNoPrefix(chunks[0])
+				if err != nil {
+					return err
+				}
+				buf = append(buf, bindata...)
+				break
+
 			}
+
 		}
 	}
 
