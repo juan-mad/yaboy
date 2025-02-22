@@ -30,4 +30,3 @@ func ReadBinaryFile(inputPath string) ([]uint8, error) {
 
 	return data, nil
 }
-

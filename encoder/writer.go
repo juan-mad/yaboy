@@ -39,6 +39,9 @@ func EncodeTextFile(inputPath, outputPath string) error {
 		line := scanner.Text()
 		fmt.Println(line)
 		chunks := strings.Fields(strings.TrimSpace(line))
+		if len(chunks) == 1 {
+			return fmt.Errorf("Cannot interpret input line: %s\n", line)
+		}
 		if IsPrefix(chunks[0]) {
 			// TODO
 		} else {
@@ -46,14 +49,7 @@ func EncodeTextFile(inputPath, outputPath string) error {
 
 			switch opcodeString {
 			case "LD":
-				var inp string
-				if len(chunks) == 3 {
-					inp = chunks[1] + chunks[2]
-				} else if len(chunks) == 2 {
-					inp = chunks[1]
-				} else {
-					return fmt.Errorf("Unexpected split of input line: %s\n", line)
-				}
+				inp := strings.Join(chunks[1:], "")
 				bindata, err := encodeLoad(inp)
 				if err != nil {
 					return err
@@ -61,14 +57,7 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				buf = append(buf, bindata...)
 				break
 			case "LDH":
-				var inp string
-				if len(chunks) == 3 {
-					inp = chunks[1] + chunks[2]
-				} else if len(chunks) == 2 {
-					inp = chunks[1]
-				} else {
-					return fmt.Errorf("Unexpected split of input line: %s\n", line)
-				}
+				inp := strings.Join(chunks[1:], "")
 				bindata, err := encodeLoadH(inp)
 				if err != nil {
 					return err

@@ -173,7 +173,12 @@ func encodeLoad(argStr string) ([]uint8, error) {
 		if err != nil {
 			return []uint8{}, fmt.Errorf("Could not parse immediate 16bit hex value %s: %w", args[1], err)
 		}
-		return []uint8{0xFA, LSB(n), MSB(n)}, nil
+		// if it fits in 8 bits, we encode as 0x3E, if not, as 0xFA
+		if (n >> 8) == 0 {
+			return []uint8{0x3E, uint8(n)}, nil
+		} else {
+			return []uint8{0xFA, LSB(n), MSB(n)}, nil
+		}
 	}
 
 	if len(args[1]) == 3 || len(args[1]) == 4 {
