@@ -73,16 +73,6 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				}
 				buf = append(buf, bindata...)
 				break
-			case "INC":
-				if len(chunks) != 2 {
-					return fmt.Errorf("Unexpected split of input line: %s\n", line)
-				}
-				bindata, err := encodeIncrement(chunks[1])
-				if err != nil {
-					return err
-				}
-				buf = append(buf, bindata...)
-				break
 			case "PUSH":
 				if len(chunks) != 2 {
 					return fmt.Errorf("Unexpected split of input line: %s\n", line)
@@ -113,11 +103,11 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				}
 				buf = append(buf, bindata...)
 				break
-			case "ADD", "ADC", "SUB", "SBC", "AND", "XOR", "OR", "CP", "DAA", "SCF", "CPL", "CCF":
+			case "ADD", "ADC", "SUB", "SBC", "AND", "XOR", "OR", "CP", "DAA", "SCF", "CPL", "CCF", "INC", "DEC":
 				if len(chunks) < 1 && len(chunks) > 3 {
 					return fmt.Errorf("Unexpected split of input line: %s\n", line)
 				}
-				bindata, err := encode8bitArithmetic(chunks)
+				bindata, err := encodeBitArithmetic(chunks)
 				if err != nil {
 					return err
 				}
