@@ -104,10 +104,24 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				buf = append(buf, bindata...)
 				break
 			case "ADD", "ADC", "SUB", "SBC", "AND", "XOR", "OR", "CP", "DAA", "SCF", "CPL", "CCF", "INC", "DEC":
-				if len(chunks) < 1 && len(chunks) > 3 {
+				if len(chunks) < 1 || len(chunks) > 3 {
 					return fmt.Errorf("Unexpected split of input line: %s\n", line)
 				}
 				bindata, err := encodeBitArithmetic(chunks)
+				if err != nil {
+					return err
+				}
+				buf = append(buf, bindata...)
+			case "JR":
+				var inp string
+				if len(chunks) == 3 {
+					inp = chunks[1] + chunks[2]
+				} else if len(chunks) == 2 {
+					inp = chunks[1]
+				} else {
+					 return fmt.Errorf("Unexpected split of input line: %s\n", line)
+				}
+				bindata, err := encodeRelativeJump(inp)
 				if err != nil {
 					return err
 				}

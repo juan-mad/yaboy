@@ -54,6 +54,13 @@ var ALUMAPPER = map[string]uint8 {
 }
 
 var ALUUNARYOP = []string{"DAA", "SCF", "CPL", "CCF",}
+var FLAGS = []string{"NZ", "Z", "NC", "C"}
+var FLAGMAPPER = map[string]uint8 {
+	"NZ": 0,
+	"Z": 1,
+	"NC": 2,
+	"C": 3,
+}
 
 // IsPrefix checks that a string represents one of the prefixes
 func IsPrefix(s string) bool {
@@ -281,6 +288,8 @@ func encodeMisc(chunks []string) ([]uint8, error) {
 
 	return []uint8{}, fmt.Errorf("Invalid push instruction: %s", chunks)
 }
+
+// encodeBitArithmetic produces the bytes for arithmetic instructions
 func encodeBitArithmetic(chunks []string) ([]uint8, error) {
 	var opcode uint8
 	var instr string = chunks[0]
@@ -370,5 +379,69 @@ func encodeBitArithmetic(chunks []string) ([]uint8, error) {
 		}
 		return []uint8{opcode, n}, nil
 	}
+}
+
+// encodeRelativeJump produces the bytes for relative jump instructions, JR
+func encodeRelativeJump(argStr string) ([]uint8, error) {
+	var opcode uint8
+	args := strings.Split(strings.ReplaceAll(strings.TrimSpace(argStr), " ", ""), ",")
+	if len(args) == 0 || len(args) > 2 {
+		return []uint8{}, fmt.Errorf("could not parse JR arguments: %s", argStr)
+	}
+
+	hexStr := args[len(args) - 1]
+	if !(hexStr[:2] == "0x" && len(hexStr) >= 3 && len(hexStr) <= 4) {
+		return []uint8{}, fmt.Errorf("Invalid arguments passed: %s", argStr)
+	}
+	nn, err := strconv.ParseUint(args[0], 16, 8)
+	n := uint8(nn)
+	if err != nil {
+		return []uint8{}, fmt.Errorf("Could not parse immediate 8bit hex value %s: %w", argStr, err)
+	}
+
+	if len(args) == 1 {
+		return []uint8{0x18, n}, nil
+	}
+
+	opcode = (1 << 5) | (FLAGMAPPER[args[1]] << 3)
+	return []uint8{opcode, n}, nil
+
+}
+
+// encodeJump produces the bytes for jump instructions, JP
+func encodeJump(argStr string) ([]uint8, error) {
+	var opcode uint8
+	args := strings.Split(strings.ReplaceAll(strings.TrimSpace(argStr), " ", ""), ",")
+	if len(args) == 0 || len(args) > 2 {
+		return []uint8{}, fmt.Errorf("could not parse JR arguments: %s", argStr)
+	}
+
+	if len(args) == 1 {
+		if args[1] == "HL" {
+			return []uint8{0xE9}, nil
+		}
+	}
+
+	hexStr := args[len(args) - 1]
+	if !(hexStr[:2] == "0x" && len(hexStr) >= 3 && len(hexStr) <= 4) {
+		return []uint8{}, fmt.Errorf("Invalid arguments passed: %s", argStr)
+	}
+	nn, err := strconv.ParseUint(args[0], 16, 8)
+	n := uint8(nn)
+	if err != nil {
+		return []uint8{}, fmt.Errorf("Could not parse immediate 8bit hex value %s: %w", argStr, err)
+	}
+
+	if len(args) == 1 {
+		return []uint8{0xC3, n}, nil
+	}
+
+	if !slices.Contains(FLAGS, args[1]) {
+		return []uint8{}, fmt.Errorf("Invalid JP instruction: JP %s", argStr)
+	}
+	
+	opcode = 0b11000010 | (FLAGMAPPER[args[1]] << 3)
+	return []uint8{opcode, n}, nil
+
 }
 
