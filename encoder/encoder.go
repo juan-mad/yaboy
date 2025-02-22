@@ -53,6 +53,9 @@ var ALUMAPPER = map[string]uint8{
 	"DEC": 5,
 }
 
+// opcode = (2 << 6) | (ALUMAPPER[instr] << 3) | REGMAPPER[rightop]
+// 0x84
+// 0b100000100
 var ALUUNARYOP = []string{"DAA", "SCF", "CPL", "CCF"}
 var FLAGS = []string{"NZ", "Z", "NC", "C"}
 var FLAGMAPPER = map[string]uint8{
@@ -294,22 +297,22 @@ func encodeMisc(chunks []string) ([]uint8, error) {
 }
 
 // encodeBitArithmetic produces the bytes for arithmetic instructions
-func encodeBitArithmetic(chunks []string) ([]uint8, error) {
+func encodeBitArithmetic(instr string, argStr string) ([]uint8, error) {
 	var opcode uint8
-	var instr string = chunks[0]
-	var rightop string
 
-	// check that chunks has 1, 2, or 3 elements
-	if len(chunks) < 1 || len(chunks) > 4 {
-		return []uint8{}, fmt.Errorf("Unexpected number of arguments: %s", chunks)
-	}
-	// if 3 elems but first operand is not A, error
-	if len(chunks) == 3 && chunks[1] != "A" {
-		return []uint8{}, fmt.Errorf("Invalid 8bit ALU operation, A register must be first operand: %s", chunks)
+	args := strings.Split(strings.ReplaceAll(strings.TrimSpace(argStr), " ", ""), ",")
+
+	if len(args) > 2 {
+		return []uint8{}, fmt.Errorf("Unexpected number (%d) of arguments: %s", len(args), args)
 	}
 
-	// if only one element, it must be an instruction with no operands
-	if len(chunks) == 1 {
+	// if 2 elems but first operand is not A, error
+	if len(args) == 1 && ((args[0] == "A") && (args[0] != "HL")) {
+		return []uint8{}, fmt.Errorf("Invalid ALU operation %s, register A or HL must be first operand: %s", instr, args)
+	}
+
+	// if no operands, it must be one of these
+	if len(args) == 0 {
 		if !slices.Contains(ALUUNARYOP, instr) {
 			return []uint8{}, fmt.Errorf("Invalid %s instruction with no operands", instr)
 		}
@@ -322,59 +325,68 @@ func encodeBitArithmetic(chunks []string) ([]uint8, error) {
 			return []uint8{0x2F}, nil
 		case "CCF":
 			return []uint8{0x3F}, nil
+		default:
+			// should never happen
+			return []uint8{}, fmt.Errorf("Unknown use of encodeBitArithmetic: %s %s", instr, args)
 		}
 	}
 
 	// if more than one element, check that it has no operands, or error
 	if slices.Contains(ALUUNARYOP, instr) {
-		return []uint8{}, fmt.Errorf("Invalid instruction %s with operands: %s", instr, chunks[1:])
+		return []uint8{}, fmt.Errorf("Invalid instruction %s with operands: %s", instr, args)
 	}
 
 	// INC and DEC instructions that take exactly one arguments
-	if len(chunks) == 2 && (instr == "INC" || instr == "DEC" || instr == "ADD") {
-		if Is8BitRegister(chunks[1]) {
-			opcode = (REGMAPPER[chunks[1]] << 3) | ALUMAPPER[instr]
+	if len(args) == 1 && (instr == "INC" || instr == "DEC") {
+		if Is8BitRegister(args[0]) {
+			opcode = (REGMAPPER[args[0]] << 3) | ALUMAPPER[instr]
 			return []uint8{opcode}, nil
 			// return []uint8{}, fmt.Errorf("Invalid instruction %s with no 8bit reg: %s", instr, chunks[1])
-		} else if slices.Contains(REGP, chunks[1]) {
+		} else if slices.Contains(REGP, args[0]) {
 			if instr == "INC" {
-				opcode = (REGMAPPER[chunks[1]] << 4) | 0x3
+				opcode = (REGMAPPER[args[0]] << 4) | 0x3
 			} else if instr == "DEC" { // DEC
-				opcode = (REGMAPPER[chunks[1]] << 4) | 0xB
-			} else { // ADD
-				opcode = (REGMAPPER[chunks[1]] << 4) | 0x9
+				opcode = (REGMAPPER[args[0]] << 4) | 0xB
 			}
 			return []uint8{opcode}, nil
 		}
 	}
-	if len(chunks) == 3 && instr == "ADD" && chunks[1] == "SP" {
-		if !(chunks[2][:2] == "0x" && len(chunks[2]) >= 3 && len(chunks[2]) <= 4) {
-			return []uint8{}, fmt.Errorf("Invalid ADD argument: %s", chunks)
+
+	if len(args) == 2 && instr == "ADD" && args[0] == "SP" {
+		if !(args[1][:2] == "0x" && len(args[1]) >= 3 && len(args[1]) <= 4) {
+			return []uint8{}, fmt.Errorf("Invalid ADD argument: %s", args)
 		}
-		nn, err := strconv.ParseInt(rightop[2:], 16, 8)
+		nn, err := strconv.ParseUint(args[1][2:], 16, 8)
 		n := uint8(nn)
 		if err != nil {
-			return []uint8{}, fmt.Errorf("Could not parse immediate 8bit hex value %s: %w", rightop, err)
+			return []uint8{}, fmt.Errorf("Could not parse immediate 8bit hex value %s: %w", args, err)
 		}
 		return []uint8{0xE8, n}, nil
 	}
 
 	// at this point, there should be no DEC or INC
 	if instr == "DEC" || instr == "INC" {
-		return []uint8{}, fmt.Errorf("Invalid %s instruction: %s", instr, chunks)
+		return []uint8{}, fmt.Errorf("Invalid %s instruction: %s", instr, args)
 	}
 
 	// rest of operations may ommit A as first operand, we just want the second one
-	rightop = chunks[len(chunks)-1]
+	rightop := args[len(args)-1]
 
 	// operation between operands
+	fmt.Println(instr, args)
 	if Is8BitRegister(rightop) {
 		opcode = (2 << 6) | (ALUMAPPER[instr] << 3) | REGMAPPER[rightop]
+		return []uint8{opcode}, nil
+	} else if args[0] == "HL" {
+		if !slices.Contains(REGP, args[1]) {
+			return []uint8{}, fmt.Errorf("Invalid ADD arguments: %s", args)
+		}
+		opcode = (REGMAPPER[args[1]] << 4) | 0x9
 		return []uint8{opcode}, nil
 	} else {
 		opcode = (3 << 6) | ALUMAPPER[instr] | 0x6
 		if !(rightop[:2] == "0x" && len(rightop) >= 3 && len(rightop) <= 4) {
-			return []uint8{}, fmt.Errorf("Invalid arguments passed: %s", chunks)
+			return []uint8{}, fmt.Errorf("Invalid arguments passed: %s", args)
 		}
 		nn, err := strconv.ParseUint(rightop[2:], 16, 8)
 		n := uint8(nn)

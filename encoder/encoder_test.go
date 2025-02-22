@@ -69,18 +69,72 @@ func TestLoad(t *testing.T) {
 	}
 
 	// out := []uint8{0x3E, 0x00}
-	if !slices.Equal(data, LOAD_OUTPUT) {
-		t.Errorf("Failed LD test\n\tExpected: %s\n\tActual: %s", LOAD_OUTPUT, data)
-	}
+	// if !slices.Equal(data, LOAD_OUTPUT) {
+	// 	t.Errorf("Failed LD test\n\tExpected: %s\n\tActual: %s", LOAD_OUTPUT, data)
+	// }
 
 	if !slices.Equal(data, LOAD_OUTPUT) {
 		t.Errorf("Failed LD test\n\tExpected: %s\n\tActual: %s", LOAD_OUTPUT, data)
 		t.Logf("Length of expctd: %d", len(LOAD_OUTPUT))
-		t.Logf("Length of actual: %d", len(LOAD_OUTPUT))
+		t.Logf("Length of actual: %d", len(data))
 
 		expelems := []string{}
 		actelems := []string{}
 		for _, bb := range LOAD_OUTPUT {
+			expelems = append(expelems, fmt.Sprintf("%#02x", bb))
+		}
+		for _, bb := range data {
+			actelems = append(actelems, fmt.Sprintf("%#02x", bb))
+		}
+
+		t.Logf("Hex of expctd: %s", expelems)
+		t.Logf("Hex of actual: %s", actelems)
+	}
+}
+
+func TestAdd(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,0x00"
+	inputFileName, err := createInputFile(tempDir, ADD_INPUT)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFileName, err := createFile(tempDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// testing
+	err = enc.EncodeTextFile(inputFileName, outputFileName)
+	if err != nil {
+		t.Fatalf("Error encoding ADD input: %s", err)
+	}
+
+	// decode
+	data, err := enc.ReadBinaryFile(outputFileName)
+	if err != nil {
+		t.Fatal("Failed to read 8bit arithmetic test output")
+	}
+
+	if len(data) == 0 {
+		t.Error("Read output is empty!")
+	}
+
+	// out := []uint8{0x3E, 0x00}
+	// if !slices.Equal(data, ARITH8BIT_OUTPUT) {
+	// 	t.Errorf("Failed LD test\n\tExpected: %s\n\tActual: %s", ARITH8BIT_OUTPUT, data)
+	// }
+
+	if !slices.Equal(data, ADD_OUTPUT) {
+		t.Errorf("Failed ADD test\n\tExpected: %s\n\tActual: %s", ADD_OUTPUT, data)
+		t.Logf("Length of expctd: %d", len(ADD_OUTPUT))
+		t.Logf("Length of actual: %d", len(data))
+
+		expelems := []string{}
+		actelems := []string{}
+		for _, bb := range ADD_OUTPUT {
 			expelems = append(expelems, fmt.Sprintf("%#02x", bb))
 		}
 		for _, bb := range data {

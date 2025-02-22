@@ -37,7 +37,6 @@ func EncodeTextFile(inputPath, outputPath string) error {
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		fmt.Println(line)
 		chunks := strings.Fields(strings.TrimSpace(line))
 		if len(chunks) == 1 {
 			return fmt.Errorf("Cannot interpret input line: %s\n", line)
@@ -95,10 +94,8 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				buf = append(buf, bindata...)
 				break
 			case "ADD", "ADC", "SUB", "SBC", "AND", "XOR", "OR", "CP", "DAA", "SCF", "CPL", "CCF", "INC", "DEC":
-				if len(chunks) < 1 || len(chunks) > 3 {
-					return fmt.Errorf("Unexpected split of input line: %s\n", line)
-				}
-				bindata, err := encodeBitArithmetic(chunks)
+				inp := strings.Join(chunks[1:], "")
+				bindata, err := encodeBitArithmetic(chunks[0], inp)
 				if err != nil {
 					return err
 				}
