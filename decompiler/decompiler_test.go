@@ -1,0 +1,272 @@
+package decompiler_test
+
+import "os"
+import "fmt"
+import "errors"
+import "encoding/binary"
+import "testing"
+import "slices"
+import "yaboy/decompiler"
+import enc "yaboy/encoder"
+
+func createInputFile(tempDir string, content []uint8) (_ string, err error) {
+	f, err := os.CreateTemp(tempDir, "tempFile")
+	if err != nil {
+		return "", err
+	}
+	defer func() {
+		err = errors.Join(err, f.Close())
+	}()
+
+	// Write the actual data slice
+	err = binary.Write(f, binary.LittleEndian, content)
+	if err != nil {
+		return "", fmt.Errorf("failed to write data: %w", err)
+	}
+
+	return f.Name(), nil
+}
+
+func createFile(tempDir string) (_ string, err error) {
+	f, err := os.CreateTemp(tempDir, "tempFile")
+	if err != nil {
+		return "", err
+	}
+	defer func() {
+		err = errors.Join(err, f.Close())
+	}()
+
+	return f.Name(), nil
+}
+
+func Test0x(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,0x00"
+	inputFileName, err := createInputFile(tempDir, INPUT_0x)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, OUTPUT_0x) {
+		t.Errorf("Failed LD test\n\tExpected: %s\n\tActual: %s", OUTPUT_0x, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_0x))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}
+
+func Test1x(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,1x00"
+	inputFileName, err := createInputFile(tempDir, INPUT_1x)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, OUTPUT_1x) {
+		t.Errorf("Failed LD test\n\tExpected: %s\n\tActual:   %s", OUTPUT_1x, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_1x))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}
+
+func Test2x(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,2x00"
+	inputFileName, err := createInputFile(tempDir, INPUT_2x)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, OUTPUT_2x) {
+		t.Errorf("Failed LD test\n\tExpected: %s\n\tActual:   %s", OUTPUT_2x, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_2x))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}
+
+func Test3x(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,3x00"
+	inputFileName, err := createInputFile(tempDir, INPUT_3x)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, OUTPUT_3x) {
+		t.Errorf("Failed LD test\n\tExpected: %s\n\tActual:   %s", OUTPUT_3x, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_3x))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}
+
+func Test4x(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,4x00"
+	inputFileName, err := createInputFile(tempDir, INPUT_4x)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, OUTPUT_4x) {
+		t.Errorf("Failed LD test\n\tExpected: %s\n\tActual:   %s", OUTPUT_4x, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_4x))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}
+
+func Test5x(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,5x00"
+	inputFileName, err := createInputFile(tempDir, INPUT_5x)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, OUTPUT_5x) {
+		t.Errorf("Failed LD test\n\tExpected: %s\n\tActual:   %s", OUTPUT_5x, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_5x))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}
+
+func Test6x(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,6x00"
+	inputFileName, err := createInputFile(tempDir, INPUT_6x)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, OUTPUT_6x) {
+		t.Errorf("Failed LD test\n\tExpected: %s\n\tActual:   %s", OUTPUT_6x, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_6x))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}
+
+func Test7x(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,7x00"
+	inputFileName, err := createInputFile(tempDir, INPUT_7x)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, OUTPUT_7x) {
+		t.Errorf("Failed LD test\n\tExpected: %s\n\tActual:   %s", OUTPUT_7x, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_7x))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}

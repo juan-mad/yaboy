@@ -1,0 +1,625 @@
+package decompiler_test
+
+var INPUT_0x = []uint8{
+	// NOP
+	0x00,
+	// LD BC,0x1234
+	0x01,
+	0x34,
+	0x12,
+	// LD [BC],A
+	0x02,
+	// INC BC
+	0x03,
+	// INC B
+	0x04,
+	// DEC B
+	0x05,
+	// LD B,0xff
+	0x06,
+	0xFF,
+	// RLCA
+	0x07,
+	// LD [0xfaef],SP
+	0x08,
+	0xEF,
+	0xFA,
+	// ADD HL,BC
+	0x09,
+	// LD A,[BC]
+	0x0A,
+	// DEC BC
+	0x0B,
+	// INC C
+	0x0C,
+	// DEC C
+	0x0D,
+	// LD C,0x67
+	0x0E,
+	0x67,
+	// RRCA
+	0x0F,
+}
+
+var OUTPUT_0x = []string{
+	"NOP",
+	"LD BC,0x1234",
+	"LD [BC],A",
+	"INC BC",
+	"INC B",
+	"DEC B",
+	"LD B,0xff",
+	"RLCA",
+	"LD [0xfaef],SP",
+	"ADD HL,BC",
+	"LD A,[BC]",
+	"DEC BC",
+	"INC C",
+	"DEC C",
+	"LD C,0x67",
+	"RRCA",
+}
+
+var INPUT_1x = []uint8{
+	// STOP 0x5E
+	0x10,
+	0x5E,
+	// LD DE,0x56BC
+	0x11,
+	0xBC,
+	0x56,
+	// LD [DE],A
+	0x12,
+	// INC DE
+	0x13,
+	// INC D
+	0x14,
+	// DEC D
+	0x15,
+	// LD D,0xA4
+	0x16,
+	0xA4,
+	// RLA
+	0x17,
+	// JR 0x14
+	0x18,
+	0x14,
+	// ADD HL,DE
+	0x19,
+	// LD A,[DE]
+	0x1A,
+	// DEC DE
+	0x1B,
+	// INC E
+	0x1C,
+	// DEC E
+	0x1D,
+	// LD E,0x12
+	0x1E,
+	0x12,
+	// RRA
+	0x1F,
+}
+
+var OUTPUT_1x = []string{
+	"STOP 0x5e",
+	"LD DE,0x56bc",
+	"LD [DE],A",
+	"INC DE",
+	"INC D",
+	"DEC D",
+	"LD D,0xa4",
+	"RLA",
+	"JR 0x14",
+	"ADD HL,DE",
+	"LD A,[DE]",
+	"DEC DE",
+	"INC E",
+	"DEC E",
+	"LD E,0x12",
+	"RRA",
+}
+
+var INPUT_2x = []uint8{
+	// JR NZ,0x12
+	0x20,
+	0x12,
+	// LD HL,0x1234
+	0x21,
+	0x34,
+	0x12,
+	// LD [HL+],A
+	0x22,
+	// INC HL
+	0x23,
+	// INC H
+	0x24,
+	// DEC H
+	0x25,
+	// LD H,0x12
+	0x26,
+	0x12,
+	// DAA
+	0x27,
+	// JR Z,0xaa
+	0x28,
+	0xAA,
+	// ADD HL,HL
+	0x29,
+	// LD A,[HL+]
+	0x2A,
+	// DEC HL
+	0x2B,
+	// INC L
+	0x2C,
+	// DEC L
+	0x2D,
+	// LD L,0x12
+	0x2E,
+	0x12,
+	// CPL
+	0x2F,
+}
+
+var OUTPUT_2x = []string{
+	"JR NZ,0x12",
+	"LD HL,0x1234",
+	"LD [HL+],A",
+	"INC HL",
+	"INC H",
+	"DEC H",
+	"LD H,0x12",
+	"DAA",
+	"JR Z,0xaa",
+	"ADD HL,HL",
+	"LD A,[HL+]",
+	"DEC HL",
+	"INC L",
+	"DEC L",
+	"LD L,0x12",
+	"CPL",
+}
+
+var INPUT_3x = []uint8{
+	//. JR NC,0x12
+	0x30,
+	0x12,
+	// LD SP,0x1234
+	0x31,
+	0x34,
+	0x12,
+	// LD [HL-],A
+	0x32,
+	// INC SP
+	0x33,
+	// INC [HL]
+	0x34,
+	// DEC [HL]
+	0x35,
+	// LD [HL],0x12
+	0x36,
+	0x12,
+	// SCF
+	0x37,
+	// JR C,0x12
+	0x38,
+	0x12,
+	// ADD HL,SP
+	0x39,
+	// LD A,[HL-]
+	0x3A,
+	// DEC SP
+	0x3B,
+	// INC A
+	0x3C,
+	// DEC A
+	0x3D,
+	// LD A,0x12
+	0x3E,
+	0x12,
+	// CCF
+	0x3F,
+}
+
+var OUTPUT_3x = []string{
+	"JR NC,0x12",
+	"LD SP,0x1234",
+	"LD [HL-],A",
+	"INC SP",
+	"INC [HL]",
+	"DEC [HL]",
+	"LD [HL],0x12",
+	"SCF",
+	"JR C,0x12",
+	"ADD HL,SP",
+	"LD A,[HL-]",
+	"DEC SP",
+	"INC A",
+	"DEC A",
+	"LD A,0x12",
+	"CCF",
+}
+
+var INPUT_4x = []uint8{
+	// LD B,B
+	0x40,
+	// LD B,C
+	0x41,
+	// LD B,D
+	0x42,
+	// LD B,E
+	0x43,
+	// LD B,H
+	0x44,
+	// LD B,L
+	0x45,
+	// LD B,[HL]
+	0x46,
+	// LD B,A
+	0x47,
+	// LD C,B
+	0x48,
+	// LD C,C
+	0x49,
+	// LD C,D
+	0x4A,
+	// LD C,E
+	0x4B,
+	// LD C,H
+	0x4C,
+	// LD C,L
+	0x4D,
+	// LD C,[HL]
+	0x4E,
+	// LD C,A
+	0x4F,
+}
+
+var OUTPUT_4x = []string{
+	"LD B,B",
+	"LD B,C",
+	"LD B,D",
+	"LD B,E",
+	"LD B,H",
+	"LD B,L",
+	"LD B,[HL]",
+	"LD B,A",
+	"LD C,B",
+	"LD C,C",
+	"LD C,D",
+	"LD C,E",
+	"LD C,H",
+	"LD C,L",
+	"LD C,[HL]",
+	"LD C,A",
+}
+
+var INPUT_5x = []uint8{
+	// LD D,B
+	0x50,
+	// LD D,C
+	0x51,
+	// LD D,D
+	0x52,
+	// LD D,E
+	0x53,
+	// LD D,H
+	0x54,
+	// LD D,L
+	0x55,
+	// LD D,[HL]
+	0x56,
+	// LD D,A
+	0x57,
+	// LD E,B
+	0x58,
+	// LD E,C
+	0x59,
+	// LD E,D
+	0x5A,
+	// LD E,E
+	0x5B,
+	// LD E,H
+	0x5C,
+	// LD E,L
+	0x5D,
+	// LD E,[HL]
+	0x5E,
+	// LD E,A
+	0x5F,
+}
+
+var OUTPUT_5x = []string{
+	"LD D,B",
+	"LD D,C",
+	"LD D,D",
+	"LD D,E",
+	"LD D,H",
+	"LD D,L",
+	"LD D,[HL]",
+	"LD D,A",
+	"LD E,B",
+	"LD E,C",
+	"LD E,D",
+	"LD E,E",
+	"LD E,H",
+	"LD E,L",
+	"LD E,[HL]",
+	"LD E,A",
+}
+
+var INPUT_6x = []uint8{
+	// LD H,B
+	0x60,
+	// LD H,C
+	0x61,
+	// LD H,D
+	0x62,
+	// LD H,E
+	0x63,
+	// LD H,H
+	0x64,
+	// LD H,L
+	0x65,
+	// LD H,[HL]
+	0x66,
+	// LD H,A
+	0x67,
+	// LD L,B
+	0x68,
+	// LD L,C
+	0x69,
+	// LD L,D
+	0x6A,
+	// LD L,E
+	0x6B,
+	// LD L,H
+	0x6C,
+	// LD L,L
+	0x6D,
+	// LD L,[HL]
+	0x6E,
+	// LD L,A
+	0x6F,
+}
+
+var OUTPUT_6x = []string{
+	"LD H,B",
+	"LD H,C",
+	"LD H,D",
+	"LD H,E",
+	"LD H,H",
+	"LD H,L",
+	"LD H,[HL]",
+	"LD H,A",
+	"LD L,B",
+	"LD L,C",
+	"LD L,D",
+	"LD L,E",
+	"LD L,H",
+	"LD L,L",
+	"LD L,[HL]",
+	"LD L,A",
+}
+
+var INPUT_7x = []uint8{
+	// LD [HL],B
+	0x70,
+	// LD [HL],C
+	0x71,
+	// LD [HL],D
+	0x72,
+	// LD [HL],E
+	0x73,
+	// LD [HL],H
+	0x74,
+	// LD [HL],L
+	0x75,
+	// HALT
+	0x76,
+	// LD [HL],A
+	0x77,
+	// LD A,B
+	0x78,
+	// LD A,C
+	0x79,
+	// LD A,D
+	0x7A,
+	// LD A,E
+	0x7B,
+	// LD A,H
+	0x7C,
+	// LD A,L
+	0x7D,
+	// LD A,[HL]
+	0x7E,
+	// LD A,A
+	0x7F,
+}
+
+var OUTPUT_7x = []string{
+	"LD [HL],B",
+	"LD [HL],C",
+	"LD [HL],D",
+	"LD [HL],E",
+	"LD [HL],H",
+	"LD [HL],L",
+	"HALT",
+	"LD [HL],A",
+	"LD A,B",
+	"LD A,C",
+	"LD A,D",
+	"LD A,E",
+	"LD A,H",
+	"LD A,L",
+	"LD A,[HL]",
+	"LD A,A",
+}
+
+var INPUT_8x = []uint8{
+	// LD H,B
+	0x80,
+	// LD H,C
+	0x81,
+	// LD H,D
+	0x82,
+	// LD H,E
+	0x83,
+	// LD H,H
+	0x84,
+	// LD H,L
+	0x85,
+	// LD H,[HL]
+	0x86,
+	// LD H,A
+	0x87,
+	// LD L,B
+	0x88,
+	// LD L,C
+	0x89,
+	// LD L,D
+	0x8A,
+	// LD L,E
+	0x8B,
+	// LD L,H
+	0x8C,
+	// LD L,L
+	0x8D,
+	// LD L,[HL]
+	0x8E,
+	// LD L,A
+	0x8F,
+}
+
+var INPUT_9x = []uint8{
+	0x90,
+	0x91,
+	0x92,
+	0x93,
+	0x94,
+	0x95,
+	0x96,
+	0x97,
+	0x98,
+	0x99,
+	0x9A,
+	0x9B,
+	0x9C,
+	0x9D,
+	0x9E,
+	0x9F,
+}
+
+var INPUT_Ax = []uint8{
+	0xA0,
+	0xA1,
+	0xA2,
+	0xA3,
+	0xA4,
+	0xA5,
+	0xA6,
+	0xA7,
+	0xA8,
+	0xA9,
+	0xAA,
+	0xAB,
+	0xAC,
+	0xAD,
+	0xAE,
+	0xAF,
+}
+
+var INPUT_Bx = []uint8{
+	0xB0,
+	0xB1,
+	0xB2,
+	0xB3,
+	0xB4,
+	0xB5,
+	0xB6,
+	0xB7,
+	0xB8,
+	0xB9,
+	0xBA,
+	0xBB,
+	0xBC,
+	0xBD,
+	0xBE,
+	0xBF,
+}
+
+var INPUT_Cx = []uint8{
+	0xC0,
+	0xC1,
+	0xC2,
+	0xC3,
+	0xC4,
+	0xC5,
+	0xC6,
+	0xC7,
+	0xC8,
+	0xC9,
+	0xCA,
+	0xCB,
+	0xCC,
+	0xCD,
+	0xCE,
+	0xCF,
+}
+
+var INPUT_Dx = []uint8{
+	0xD0,
+	0xD1,
+	0xD2,
+	0xD3,
+	0xD4,
+	0xD5,
+	0xD6,
+	0xD7,
+	0xD8,
+	0xD9,
+	0xDA,
+	0xDB,
+	0xDC,
+	0xDD,
+	0xDE,
+	0xDF,
+}
+
+var INPUT_Ex = []uint8{
+	0xE0,
+	0xE1,
+	0xE2,
+	0xE3,
+	0xE4,
+	0xE5,
+	0xE6,
+	0xE7,
+	0xE8,
+	0xE9,
+	0xEA,
+	0xEB,
+	0xEC,
+	0xED,
+	0xEE,
+	0xEF,
+}
+
+var INPUT_Fx = []uint8{
+	0xF0,
+	0xF1,
+	0xF2,
+	0xF3,
+	0xF4,
+	0xF5,
+	0xF6,
+	0xF7,
+	0xF8,
+	0xF9,
+	0xFA,
+	0xFB,
+	0xFC,
+	0xFD,
+	0xFE,
+	0xFF,
+}
