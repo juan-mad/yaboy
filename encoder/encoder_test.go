@@ -361,3 +361,165 @@ func TestAnd(t *testing.T) {
 		t.Logf("Hex of actual: %s", actelems)
 	}
 }
+
+func TestExclusiveOr(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,0x00"
+	inputFileName, err := createInputFile(tempDir, XOR_INPUT)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFileName, err := createFile(tempDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// testing
+	err = enc.EncodeTextFile(inputFileName, outputFileName)
+	if err != nil {
+		t.Fatalf("Error encoding XOR input: %s", err)
+	}
+
+	// decode
+	data, err := enc.ReadBinaryFile(outputFileName)
+	if err != nil {
+		t.Fatal("Failed to read XOR test output")
+	}
+
+	if len(data) == 0 {
+		t.Error("Read output is empty!")
+	}
+
+	// out := []uint8{0x3E, 0x00}
+	// if !slices.Equal(data, ARITH8BIT_OUTPUT) {
+	// 	t.Errorf("Failed LD test\n\tExpected: %s\n\tActual: %s", ARITH8BIT_OUTPUT, data)
+	// }
+
+	if !slices.Equal(data, XOR_OUTPUT) {
+		t.Errorf("Failed XOR test\n\tExpected: %s\n\tActual: %s", XOR_OUTPUT, data)
+		t.Logf("Length of expctd: %d", len(XOR_OUTPUT))
+		t.Logf("Length of actual: %d", len(data))
+
+		expelems := []string{}
+		actelems := []string{}
+		for _, bb := range XOR_OUTPUT {
+			expelems = append(expelems, fmt.Sprintf("%#02x", bb))
+		}
+		for _, bb := range data {
+			actelems = append(actelems, fmt.Sprintf("%#02x", bb))
+		}
+
+		t.Logf("Hex of expctd: %s", expelems)
+		t.Logf("Hex of actual: %s", actelems)
+	}
+}
+
+func TestOr(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,0x00"
+	inputFileName, err := createInputFile(tempDir, OR_INPUT)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFileName, err := createFile(tempDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// testing
+	err = enc.EncodeTextFile(inputFileName, outputFileName)
+	if err != nil {
+		t.Fatalf("Error encoding OR input: %s", err)
+	}
+
+	// decode
+	data, err := enc.ReadBinaryFile(outputFileName)
+	if err != nil {
+		t.Fatal("Failed to read OR test output")
+	}
+
+	if len(data) == 0 {
+		t.Error("Read output is empty!")
+	}
+
+	// out := []uint8{0x3E, 0x00}
+	// if !slices.Equal(data, ARITH8BIT_OUTPUT) {
+	// 	t.Errorf("Failed LD test\n\tExpected: %s\n\tActual: %s", ARITH8BIT_OUTPUT, data)
+	// }
+
+	if !slices.Equal(data, OR_OUTPUT) {
+		t.Errorf("Failed XOR test\n\tExpected: %s\n\tActual: %s", OR_OUTPUT, data)
+		t.Logf("Length of expctd: %d", len(OR_OUTPUT))
+		t.Logf("Length of actual: %d", len(data))
+
+		expelems := []string{}
+		actelems := []string{}
+		for _, bb := range OR_OUTPUT {
+			expelems = append(expelems, fmt.Sprintf("%#02x", bb))
+		}
+		for _, bb := range data {
+			actelems = append(actelems, fmt.Sprintf("%#02x", bb))
+		}
+
+		t.Logf("Hex of expctd: %s", expelems)
+		t.Logf("Hex of actual: %s", actelems)
+	}
+}
+
+func TestCompare(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,0x00"
+	inputFileName, err := createInputFile(tempDir, CP_INPUT)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFileName, err := createFile(tempDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// testing
+	err = enc.EncodeTextFile(inputFileName, outputFileName)
+	if err != nil {
+		t.Fatalf("Error encoding CP input: %s", err)
+	}
+
+	// decode
+	data, err := enc.ReadBinaryFile(outputFileName)
+	if err != nil {
+		t.Fatal("Failed to read CP test output")
+	}
+
+	if len(data) == 0 {
+		t.Error("Read output is empty!")
+	}
+
+	// out := []uint8{0x3E, 0x00}
+	// if !slices.Equal(data, ARITH8BIT_OUTPUT) {
+	// 	t.Errorf("Failed LD test\n\tExpected: %s\n\tActual: %s", ARITH8BIT_OUTPUT, data)
+	// }
+
+	if !slices.Equal(data, CP_OUTPUT) {
+		t.Errorf("Failed XOR test\n\tExpected: %s\n\tActual: %s", CP_OUTPUT, data)
+		t.Logf("Length of expctd: %d", len(CP_OUTPUT))
+		t.Logf("Length of actual: %d", len(data))
+
+		expelems := []string{}
+		actelems := []string{}
+		for _, bb := range CP_OUTPUT {
+			expelems = append(expelems, fmt.Sprintf("%#02x", bb))
+		}
+		for _, bb := range data {
+			actelems = append(actelems, fmt.Sprintf("%#02x", bb))
+		}
+
+		t.Logf("Hex of expctd: %s", expelems)
+		t.Logf("Hex of actual: %s", actelems)
+	}
+}

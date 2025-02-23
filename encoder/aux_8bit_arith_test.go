@@ -66,6 +66,42 @@ AND A, 0x12
 AND C
 AND D`
 
+var XOR_INPUT = `XOR A,B
+XOR A,C
+XOR A,D
+XOR A,E
+XOR A,H
+XOR A,L
+XOR A,[HL]
+XOR A,A
+XOR A, 0xFE
+XOR E
+XOR H`
+
+var OR_INPUT = `OR A,B
+OR A,C
+OR A,D
+OR A,E
+OR A,H
+OR A,L
+OR A,[HL]
+OR A,A
+OR A, 0x6F
+OR H
+OR C`
+
+var CP_INPUT = `CP A,B
+CP A,C
+CP A,D
+CP A,E
+CP A,H
+CP A,L
+CP A,[HL]
+CP A,A
+CP A, 0x65
+CP H
+CP L`
+
 var ADD_OUTPUT = []uint8{
 	// ADD A,B
 	0x80,
@@ -205,4 +241,82 @@ var AND_OUTPUT = []uint8{
 	0xA1,
 	// AND D
 	0xA2,
+}
+
+var XOR_OUTPUT = []uint8{
+	// XOR A,B
+	0xA8,
+	// XOR A,C
+	0xA9,
+	// XOR A,D
+	0xAA,
+	// XOR A,E
+	0xAB,
+	// XOR A,H
+	0xAC,
+	// XOR A,L
+	0xAD,
+	// XOR A,[HL]
+	0xAE,
+	// XOR A,A
+	0xAF,
+	// XOR A, 0xFE
+	0xEE,
+	0xFE,
+	// XOR E
+	0xAB,
+	// XOR H
+	0xAC,
+}
+
+var OR_OUTPUT = []uint8{
+	// OR A,B
+	0xB0,
+	// OR A,C
+	0xB1,
+	// OR A,D
+	0xB2,
+	// OR A,E
+	0xB3,
+	// OR A,H
+	0xB4,
+	// OR A,L
+	0xB5,
+	// OR A,[HL]
+	0xB6,
+	// OR A,A
+	0xB7,
+	// OR A, 0x6F
+	0xF6,
+	0x6F,
+	// OR H
+	0xB4,
+	// OR C
+	0xB1,
+}
+
+var CP_OUTPUT = []uint8{
+	// CP A,B
+	0xB8,
+	// CP A,C
+	0xB9,
+	// CP A,D
+	0xBA,
+	// CP A,E
+	0xBB,
+	// CP A,H
+	0xBC,
+	// CP A,L
+	0xBD,
+	// CP A,[HL]
+	0xBE,
+	// CP A,A
+	0xBF,
+	// CP A, 0x65
+	0xFE,
+	0x65,
+	// CP H
+	0xBC,
+	// CP L
+	0xBD,
 }
