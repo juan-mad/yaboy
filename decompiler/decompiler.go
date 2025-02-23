@@ -20,6 +20,17 @@ var ENCODE_COND = map[uint8]string{
 	0: "NZ", 1: "Z", 2: "NC", 3: "C",
 }
 
+var BLOCK2_BITES = map[uint8]string{
+	0b10000: "ADD",
+	0b10001: "ADC",
+	0b10010: "SUB",
+	0b10011: "SBC",
+	0b10100: "AND",
+	0b10101: "XOR",
+	0b10110: "OR",
+	0b10111: "CP",
+}
+
 // formatOutput formats the different pieces of an instruction into a single string
 func formatOutput(ss []string, flip []int8) string {
 	if len(flip) == 2 {
@@ -177,7 +188,11 @@ func DecodeBytes(data []uint8) ([]string, error) {
 			unfInstr = []string{"JR %s,0x%02s", cond}
 			getNextBytes = 1
 			break
-
+			// BLOCK 2
+		case (b >> 6) == 0b10:
+			instr := BLOCK2_BITES[(b >> 3)]
+			reg := ENCODE_R8[(b & 0b111)]
+			output = append(output, fmt.Sprintf("%s A,%s", instr, reg))
 		}
 
 	}

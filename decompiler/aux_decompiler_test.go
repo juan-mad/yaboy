@@ -457,95 +457,219 @@ var OUTPUT_7x = []string{
 }
 
 var INPUT_8x = []uint8{
-	// LD H,B
+	// ADD A,B
 	0x80,
-	// LD H,C
+	// ADD A,C
 	0x81,
-	// LD H,D
+	// ADD A,D
 	0x82,
-	// LD H,E
+	// ADD A,E
 	0x83,
-	// LD H,H
+	// ADD A,H
 	0x84,
-	// LD H,L
+	// ADD A,L
 	0x85,
-	// LD H,[HL]
+	// ADD A,[HL]
 	0x86,
-	// LD H,A
+	// ADD A,A
 	0x87,
-	// LD L,B
+	// ADC A,B
 	0x88,
-	// LD L,C
+	// ADC A,C
 	0x89,
-	// LD L,D
+	// ADC A,D
 	0x8A,
-	// LD L,E
+	// ADC A,E
 	0x8B,
-	// LD L,H
+	// ADC A,H
 	0x8C,
-	// LD L,L
+	// ADC A,L
 	0x8D,
-	// LD L,[HL]
+	// ADC A,[HL]
 	0x8E,
-	// LD L,A
+	// ADC A,A
 	0x8F,
 }
 
+var OUTPUT_8x = []string{
+	"ADD A,B",
+	"ADD A,C",
+	"ADD A,D",
+	"ADD A,E",
+	"ADD A,H",
+	"ADD A,L",
+	"ADD A,[HL]",
+	"ADD A,A",
+	"ADC A,B",
+	"ADC A,C",
+	"ADC A,D",
+	"ADC A,E",
+	"ADC A,H",
+	"ADC A,L",
+	"ADC A,[HL]",
+	"ADC A,A",
+}
+
 var INPUT_9x = []uint8{
+	// SUB A,B
 	0x90,
+	// SUB A,C
 	0x91,
+	// SUB A,D
 	0x92,
+	// SUB A,E
 	0x93,
+	// SUB A,H
 	0x94,
+	// SUB A,L
 	0x95,
+	// SUB A,[HL]
 	0x96,
+	// SUB A,A
 	0x97,
+	// SBC A,B
 	0x98,
+	// SBC A,C
 	0x99,
+	// SBC A,D
 	0x9A,
+	// SBC A,E
 	0x9B,
+	// SBC A,H
 	0x9C,
+	// SBC A,L
 	0x9D,
+	// SBC A,[HL]
 	0x9E,
+	// SBC A,A
 	0x9F,
 }
 
+var OUTPUT_9x = []string{
+	"SUB A,B",
+	"SUB A,C",
+	"SUB A,D",
+	"SUB A,E",
+	"SUB A,H",
+	"SUB A,L",
+	"SUB A,[HL]",
+	"SUB A,A",
+	"SBC A,B",
+	"SBC A,C",
+	"SBC A,D",
+	"SBC A,E",
+	"SBC A,H",
+	"SBC A,L",
+	"SBC A,[HL]",
+	"SBC A,A",
+}
+
 var INPUT_Ax = []uint8{
+	// AND A,B
 	0xA0,
+	// AND A,C
 	0xA1,
+	// AND A,D
 	0xA2,
+	// AND A,E
 	0xA3,
+	// AND A,H
 	0xA4,
+	// AND A,L
 	0xA5,
+	// AND A,[HL]
 	0xA6,
+	// AND A,A
 	0xA7,
+	// XOR A,B
 	0xA8,
+	// XOR A,C
 	0xA9,
+	// XOR A,D
 	0xAA,
+	// XOR A,E
 	0xAB,
+	// XOR A,H
 	0xAC,
+	// XOR A,L
 	0xAD,
+	// XOR A,[HL]
 	0xAE,
+	// XOR A,A
 	0xAF,
 }
 
+var OUTPUT_Ax = []string{
+	"AND A,B",
+	"AND A,C",
+	"AND A,D",
+	"AND A,E",
+	"AND A,H",
+	"AND A,L",
+	"AND A,[HL]",
+	"AND A,A",
+	"XOR A,B",
+	"XOR A,C",
+	"XOR A,D",
+	"XOR A,E",
+	"XOR A,H",
+	"XOR A,L",
+	"XOR A,[HL]",
+	"XOR A,A",
+}
+
 var INPUT_Bx = []uint8{
+	// OR A,B
 	0xB0,
+	// OR A,C
 	0xB1,
+	// OR A,D
 	0xB2,
+	// OR A,E
 	0xB3,
+	// OR A,H
 	0xB4,
+	// OR A,L
 	0xB5,
+	// OR A,[HL]
 	0xB6,
+	// OR A,A
 	0xB7,
+	// CP A,B
 	0xB8,
+	// CP A,C
 	0xB9,
+	// CP A,D
 	0xBA,
+	// CP A,E
 	0xBB,
+	// CP A,H
 	0xBC,
+	// CP A,L
 	0xBD,
+	// CP A,[HL]
 	0xBE,
+	// CP A,A
 	0xBF,
+}
+
+var OUTPUT_Bx = []string{
+	"OR A,B",
+	"OR A,C",
+	"OR A,D",
+	"OR A,E",
+	"OR A,H",
+	"OR A,L",
+	"OR A,[HL]",
+	"OR A,A",
+	"CP A,B",
+	"CP A,C",
+	"CP A,D",
+	"CP A,E",
+	"CP A,H",
+	"CP A,L",
+	"CP A,[HL]",
+	"CP A,A",
 }
 
 var INPUT_Cx = []uint8{
