@@ -17,7 +17,7 @@ func LSB(n uint16) uint8 {
 	return uint8(0x00FF & n)
 }
 
-var PREFIXES = []string{"CB", "DD", "ED", "FD"}
+var PREFIXES = []string{"CB"}
 var BIT8REG = []string{"B", "C", "D", "E", "H", "L", "[HL]", "A"}
 var REGP = []string{"BC", "DE", "HL", "SP"}
 var REGPF = []string{"BC", "DE", "HL", "AF"}
@@ -53,6 +53,20 @@ var ALUMAPPER = map[string]uint8{
 	"DEC": 5,
 }
 
+var PREFMAPPER = map[string]uint8{
+	"RLC":  0,
+	"RRC":  1,
+	"RL":   2,
+	"RR":   3,
+	"SLA":  4,
+	"SRA":  5,
+	"SWAP": 6,
+	"SRL":  7,
+	"BIT":  1,
+	"RES":  2,
+	"SET":  3,
+}
+
 // opcode = (2 << 6) | (ALUMAPPER[instr] << 3) | REGMAPPER[rightop]
 // 0x84
 // 0b100000100
@@ -78,7 +92,6 @@ func Is8BitRegister(s string) bool {
 // encodeLoadH produces the bytes for the LDH operation, related to a subset of load operations
 // regarding the Accumulator registry A
 func encodeLoadH(argStr string) ([]uint8, error) {
-	fmt.Printf(">%s\n\n\n", argStr)
 	// Function expects that the string can be split in two sides separated by a comma
 	args := strings.Split(strings.ReplaceAll(strings.TrimSpace(argStr), " ", ""), ",")
 	if len(args) != 2 {
@@ -582,4 +595,47 @@ func encodeRotateNoPrefix(instr string) ([]uint8, error) {
 	default:
 		return []uint8{}, fmt.Errorf("unknown use of encodeRotateNoPrefix: %s", instr)
 	}
+}
+
+func encodePrefixInstructions(instruction, argStr string) ([]uint8, error) {
+	fmt.Println(instruction, argStr)
+	var opcode uint8
+	args := strings.Split(strings.ReplaceAll(strings.TrimSpace(argStr), " ", ""), ",")
+	if len(args) == 1 && args[0] == "" {
+		return []uint8{}, fmt.Errorf("No operands found! CB %s %s", instruction, args)
+	}
+
+	switch instruction {
+	case "RLC", "RRC", "RL", "RR", "SLA", "SRA", "SWAP", "SRL":
+		if len(args) != 1 {
+			return []uint8{}, fmt.Errorf("CB %s expects 1 operand, found: %s", instruction, args)
+		}
+
+		if !Is8BitRegister(args[0]) {
+			return []uint8{}, fmt.Errorf("CB %s expects 8bit register as operand, found: %s", instruction, args[0])
+		}
+
+		opcode = (PREFMAPPER[instruction] << 3) | REGMAPPER[args[0]]
+		return []uint8{0xCB, opcode}, nil
+	case "BIT", "RES", "SET":
+		if len(args) != 2 {
+			return []uint8{}, fmt.Errorf("CB %s expects 2 operands, found: %s", instruction, args)
+		}
+		if !Is8BitRegister(args[1]) {
+			return []uint8{}, fmt.Errorf("CB %s expects 8bit register as 2nd operand, found: %s", instruction, args[1])
+		}
+		nn, err := strconv.ParseUint(args[0], 16, 8)
+		if err != nil {
+			return []uint8{}, fmt.Errorf("Could not parse immediate number 0..7 value %s: %w", argStr, err)
+		}
+		n := uint8(nn)
+		if (n >> 3) != 0 {
+			return []uint8{}, fmt.Errorf("CB %s expects number between 0 and 7 as 1st operand, found: %s", instruction, args[0])
+		}
+		opcode = (PREFMAPPER[instruction] << 6) | (n << 3) | REGMAPPER[args[1]]
+		return []uint8{0xCB, opcode}, nil
+	default:
+		return []uint8{}, fmt.Errorf("Unknown arguments for encodePrefixInstructions: %s %s", instruction, args)
+	}
+
 }

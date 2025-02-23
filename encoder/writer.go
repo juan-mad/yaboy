@@ -38,11 +38,25 @@ func EncodeTextFile(inputPath, outputPath string) error {
 	for scanner.Scan() {
 		line := scanner.Text()
 		chunks := strings.Fields(strings.TrimSpace(line))
-		// if len(chunks) == 1 {
-		// 	return fmt.Errorf("Cannot interpret input line: %s\n", line)
-		// }
+		if len(chunks) == 0 || (len(chunks) == 1 && chunks[0] == "") {
+			return fmt.Errorf("empty line encountered!")
+		}
 		if IsPrefix(chunks[0]) {
-			// TODO
+			fmt.Println(chunks[0])
+			if len(chunks) == 1 {
+				return fmt.Errorf("Invalid instruction, only CB prefix!")
+			}
+			instruction := chunks[1]
+			if len(chunks) == 2 {
+				return fmt.Errorf("Invalid line: %s", line)
+			}
+			inp := strings.Join(chunks[2:], "")
+			bindata, err := encodePrefixInstructions(instruction, inp)
+			if err != nil {
+				return err
+			}
+			buf = append(buf, bindata...)
+			continue
 		} else {
 			opcodeString := chunks[0]
 

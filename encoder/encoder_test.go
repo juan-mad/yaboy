@@ -1064,3 +1064,58 @@ func TestMiscRotate(t *testing.T) {
 		t.Logf("Hex of actual: %s", actelems)
 	}
 }
+
+func TestPrefix(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,0x00"
+	inputFileName, err := createInputFile(tempDir, PREFIX_INPUT)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFileName, err := createFile(tempDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// testing
+	err = enc.EncodeTextFile(inputFileName, outputFileName)
+	if err != nil {
+		t.Fatalf("Error encoding prefix instructions input: %s", err)
+	}
+
+	// decode
+	data, err := enc.ReadBinaryFile(outputFileName)
+	t.Log(data)
+	if err != nil {
+		t.Fatal("Failed to read prefix instructions test output")
+	}
+
+	if len(data) == 0 {
+		t.Error("Read output is empty!")
+	}
+
+	// out := []uint8{0x3E, 0x00}
+	// if !slices.Equal(data, ARITH8BIT_OUTPUT) {
+	// 	t.Errorf("Failed LD test\n\tExpected: %s\n\tActual: %s", ARITH8BIT_OUTPUT, data)
+	// }
+
+	if !slices.Equal(data, PREFIX_OUTPUT) {
+		t.Errorf("Failed load prefix instructions test\n\tExpected: %s\n\tActual: %s", PREFIX_OUTPUT, data)
+		t.Logf("Length of expctd: %d", len(PREFIX_OUTPUT))
+		t.Logf("Length of actual: %d", len(data))
+
+		expelems := []string{}
+		actelems := []string{}
+		for _, bb := range PREFIX_OUTPUT {
+			expelems = append(expelems, fmt.Sprintf("%#02x", bb))
+		}
+		for _, bb := range data {
+			actelems = append(actelems, fmt.Sprintf("%#02x", bb))
+		}
+
+		t.Logf("Hex of expctd: %s", expelems)
+		t.Logf("Hex of actual: %s", actelems)
+	}
+}
