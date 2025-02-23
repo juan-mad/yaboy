@@ -18,6 +18,18 @@ ADD A, 0x7E
 ADD SP ,0xDF
 `
 
+var ADC_INPUT = `ADC A,B
+ADC A,C
+ADC A,D
+ADC A,E
+ADC A,H
+ADC A,L
+ADC A,[HL]
+ADC A,A
+ADC A, 0x5A
+ADC H
+ADC D`
+
 var ADD_OUTPUT = []uint8{
 	// ADD A,B
 	0x80,
@@ -53,4 +65,30 @@ var ADD_OUTPUT = []uint8{
 	// ADD SP,0xDF
 	0xE8,
 	0xDF,
+}
+
+var ADC_OUTPUT = []uint8{
+	// ADC A,B
+	0x88,
+	// ADC A,C
+	0x89,
+	// ADC A,D
+	0x8A,
+	// ADC A,E
+	0x8B,
+	// ADC A,H
+	0x8C,
+	// ADC A,L
+	0x8D,
+	// ADC A,[HL]
+	0x8E,
+	// ADC A,A
+	0x8F,
+	// ADC A, 0x5A
+	0xCE,
+	0x5A,
+	// ADC H
+	0x8C,
+	// ADC D
+	0x8A,
 }

@@ -384,7 +384,7 @@ func encodeBitArithmetic(instr string, argStr string) ([]uint8, error) {
 		opcode = (REGMAPPER[args[1]] << 4) | 0x9
 		return []uint8{opcode}, nil
 	} else {
-		opcode = (3 << 6) | ALUMAPPER[instr] | 0x6
+		opcode = (3 << 6) | (ALUMAPPER[instr] << 3) | 0x6
 		if !(rightop[:2] == "0x" && len(rightop) >= 3 && len(rightop) <= 4) {
 			return []uint8{}, fmt.Errorf("Invalid arguments passed: %s", args)
 		}
