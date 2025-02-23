@@ -452,7 +452,7 @@ func TestOr(t *testing.T) {
 	// }
 
 	if !slices.Equal(data, OR_OUTPUT) {
-		t.Errorf("Failed XOR test\n\tExpected: %s\n\tActual: %s", OR_OUTPUT, data)
+		t.Errorf("Failed OR test\n\tExpected: %s\n\tActual: %s", OR_OUTPUT, data)
 		t.Logf("Length of expctd: %d", len(OR_OUTPUT))
 		t.Logf("Length of actual: %d", len(data))
 
@@ -506,13 +506,337 @@ func TestCompare(t *testing.T) {
 	// }
 
 	if !slices.Equal(data, CP_OUTPUT) {
-		t.Errorf("Failed XOR test\n\tExpected: %s\n\tActual: %s", CP_OUTPUT, data)
+		t.Errorf("Failed CP test\n\tExpected: %s\n\tActual: %s", CP_OUTPUT, data)
 		t.Logf("Length of expctd: %d", len(CP_OUTPUT))
 		t.Logf("Length of actual: %d", len(data))
 
 		expelems := []string{}
 		actelems := []string{}
 		for _, bb := range CP_OUTPUT {
+			expelems = append(expelems, fmt.Sprintf("%#02x", bb))
+		}
+		for _, bb := range data {
+			actelems = append(actelems, fmt.Sprintf("%#02x", bb))
+		}
+
+		t.Logf("Hex of expctd: %s", expelems)
+		t.Logf("Hex of actual: %s", actelems)
+	}
+}
+
+func TestIncrement8(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,0x00"
+	inputFileName, err := createInputFile(tempDir, INC_INPUT)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFileName, err := createFile(tempDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// testing
+	err = enc.EncodeTextFile(inputFileName, outputFileName)
+	if err != nil {
+		t.Fatalf("Error encoding INC input: %s", err)
+	}
+
+	// decode
+	data, err := enc.ReadBinaryFile(outputFileName)
+	if err != nil {
+		t.Fatal("Failed to read INC test output")
+	}
+
+	if len(data) == 0 {
+		t.Error("Read output is empty!")
+	}
+
+	// out := []uint8{0x3E, 0x00}
+	// if !slices.Equal(data, ARITH8BIT_OUTPUT) {
+	// 	t.Errorf("Failed LD test\n\tExpected: %s\n\tActual: %s", ARITH8BIT_OUTPUT, data)
+	// }
+
+	if !slices.Equal(data, INC_OUTPUT) {
+		t.Errorf("Failed INC test\n\tExpected: %s\n\tActual: %s", INC_OUTPUT, data)
+		t.Logf("Length of expctd: %d", len(INC_OUTPUT))
+		t.Logf("Length of actual: %d", len(data))
+
+		expelems := []string{}
+		actelems := []string{}
+		for _, bb := range INC_OUTPUT {
+			expelems = append(expelems, fmt.Sprintf("%#02x", bb))
+		}
+		for _, bb := range data {
+			actelems = append(actelems, fmt.Sprintf("%#02x", bb))
+		}
+
+		t.Logf("Hex of expctd: %s", expelems)
+		t.Logf("Hex of actual: %s", actelems)
+	}
+}
+
+func TestDecrement8(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,0x00"
+	inputFileName, err := createInputFile(tempDir, DEC_INPUT)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFileName, err := createFile(tempDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// testing
+	err = enc.EncodeTextFile(inputFileName, outputFileName)
+	if err != nil {
+		t.Fatalf("Error encoding INC input: %s", err)
+	}
+
+	// decode
+	data, err := enc.ReadBinaryFile(outputFileName)
+	if err != nil {
+		t.Fatal("Failed to read INC test output")
+	}
+
+	if len(data) == 0 {
+		t.Error("Read output is empty!")
+	}
+
+	// out := []uint8{0x3E, 0x00}
+	// if !slices.Equal(data, ARITH8BIT_OUTPUT) {
+	// 	t.Errorf("Failed LD test\n\tExpected: %s\n\tActual: %s", ARITH8BIT_OUTPUT, data)
+	// }
+
+	if !slices.Equal(data, DEC_OUTPUT) {
+		t.Errorf("Failed DEC test\n\tExpected: %s\n\tActual: %s", DEC_OUTPUT, data)
+		t.Logf("Length of expctd: %d", len(DEC_OUTPUT))
+		t.Logf("Length of actual: %d", len(data))
+
+		expelems := []string{}
+		actelems := []string{}
+		for _, bb := range DEC_OUTPUT {
+			expelems = append(expelems, fmt.Sprintf("%#02x", bb))
+		}
+		for _, bb := range data {
+			actelems = append(actelems, fmt.Sprintf("%#02x", bb))
+		}
+
+		t.Logf("Hex of expctd: %s", expelems)
+		t.Logf("Hex of actual: %s", actelems)
+	}
+}
+
+func TestOther8bit(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,0x00"
+	inputFileName, err := createInputFile(tempDir, OTHER_INPUT)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFileName, err := createFile(tempDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// testing
+	err = enc.EncodeTextFile(inputFileName, outputFileName)
+	if err != nil {
+		t.Fatalf("Error encoding other 8bit arith input: %s", err)
+	}
+
+	// decode
+	data, err := enc.ReadBinaryFile(outputFileName)
+	if err != nil {
+		t.Fatal("Failed to read other 8bit arith test output")
+	}
+
+	if len(data) == 0 {
+		t.Error("Read output is empty!")
+	}
+
+	// out := []uint8{0x3E, 0x00}
+	// if !slices.Equal(data, ARITH8BIT_OUTPUT) {
+	// 	t.Errorf("Failed LD test\n\tExpected: %s\n\tActual: %s", ARITH8BIT_OUTPUT, data)
+	// }
+
+	if !slices.Equal(data, OTHER_OUTPUT) {
+		t.Errorf("Failed other 8bit arith test\n\tExpected: %s\n\tActual: %s", OTHER_OUTPUT, data)
+		t.Logf("Length of expctd: %d", len(OTHER_OUTPUT))
+		t.Logf("Length of actual: %d", len(data))
+
+		expelems := []string{}
+		actelems := []string{}
+		for _, bb := range OTHER_OUTPUT {
+			expelems = append(expelems, fmt.Sprintf("%#02x", bb))
+		}
+		for _, bb := range data {
+			actelems = append(actelems, fmt.Sprintf("%#02x", bb))
+		}
+
+		t.Logf("Hex of expctd: %s", expelems)
+		t.Logf("Hex of actual: %s", actelems)
+	}
+}
+
+func TestAdd16(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,0x00"
+	inputFileName, err := createInputFile(tempDir, ADD16_INPUT)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFileName, err := createFile(tempDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// testing
+	err = enc.EncodeTextFile(inputFileName, outputFileName)
+	if err != nil {
+		t.Fatalf("Error encoding ADD 16bit arith input: %s", err)
+	}
+
+	// decode
+	data, err := enc.ReadBinaryFile(outputFileName)
+	if err != nil {
+		t.Fatal("Failed to read ADD 16bit arith test output")
+	}
+
+	if len(data) == 0 {
+		t.Error("Read output is empty!")
+	}
+
+	// out := []uint8{0x3E, 0x00}
+	// if !slices.Equal(data, ARITH8BIT_OUTPUT) {
+	// 	t.Errorf("Failed LD test\n\tExpected: %s\n\tActual: %s", ARITH8BIT_OUTPUT, data)
+	// }
+
+	if !slices.Equal(data, ADD16_OUTPUT) {
+		t.Errorf("Failed ADD 16bit arith test\n\tExpected: %s\n\tActual: %s", ADD16_OUTPUT, data)
+		t.Logf("Length of expctd: %d", len(ADD16_OUTPUT))
+		t.Logf("Length of actual: %d", len(data))
+
+		expelems := []string{}
+		actelems := []string{}
+		for _, bb := range ADD16_OUTPUT {
+			expelems = append(expelems, fmt.Sprintf("%#02x", bb))
+		}
+		for _, bb := range data {
+			actelems = append(actelems, fmt.Sprintf("%#02x", bb))
+		}
+
+		t.Logf("Hex of expctd: %s", expelems)
+		t.Logf("Hex of actual: %s", actelems)
+	}
+}
+
+func TestIncrement16(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,0x00"
+	inputFileName, err := createInputFile(tempDir, INC16_INPUT)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFileName, err := createFile(tempDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// testing
+	err = enc.EncodeTextFile(inputFileName, outputFileName)
+	if err != nil {
+		t.Fatalf("Error encoding INC 16bit arith input: %s", err)
+	}
+
+	// decode
+	data, err := enc.ReadBinaryFile(outputFileName)
+	if err != nil {
+		t.Fatal("Failed to read INC 16bit arith test output")
+	}
+
+	if len(data) == 0 {
+		t.Error("Read output is empty!")
+	}
+
+	// out := []uint8{0x3E, 0x00}
+	// if !slices.Equal(data, ARITH8BIT_OUTPUT) {
+	// 	t.Errorf("Failed LD test\n\tExpected: %s\n\tActual: %s", ARITH8BIT_OUTPUT, data)
+	// }
+
+	if !slices.Equal(data, INC16_OUTPUT) {
+		t.Errorf("Failed INC 16bit arith test\n\tExpected: %s\n\tActual: %s", INC16_OUTPUT, data)
+		t.Logf("Length of expctd: %d", len(INC16_OUTPUT))
+		t.Logf("Length of actual: %d", len(data))
+
+		expelems := []string{}
+		actelems := []string{}
+		for _, bb := range INC16_OUTPUT {
+			expelems = append(expelems, fmt.Sprintf("%#02x", bb))
+		}
+		for _, bb := range data {
+			actelems = append(actelems, fmt.Sprintf("%#02x", bb))
+		}
+
+		t.Logf("Hex of expctd: %s", expelems)
+		t.Logf("Hex of actual: %s", actelems)
+	}
+}
+
+func TestDecrement16(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,0x00"
+	inputFileName, err := createInputFile(tempDir, DEC16_INPUT)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFileName, err := createFile(tempDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// testing
+	err = enc.EncodeTextFile(inputFileName, outputFileName)
+	if err != nil {
+		t.Fatalf("Error encoding DEC 16bit arith input: %s", err)
+	}
+
+	// decode
+	data, err := enc.ReadBinaryFile(outputFileName)
+	if err != nil {
+		t.Fatal("Failed to read DEC 16bit arith test output")
+	}
+
+	if len(data) == 0 {
+		t.Error("Read output is empty!")
+	}
+
+	// out := []uint8{0x3E, 0x00}
+	// if !slices.Equal(data, ARITH8BIT_OUTPUT) {
+	// 	t.Errorf("Failed LD test\n\tExpected: %s\n\tActual: %s", ARITH8BIT_OUTPUT, data)
+	// }
+
+	if !slices.Equal(data, DEC16_OUTPUT) {
+		t.Errorf("Failed DEC 16bit arith test\n\tExpected: %s\n\tActual: %s", DEC16_OUTPUT, data)
+		t.Logf("Length of expctd: %d", len(DEC16_OUTPUT))
+		t.Logf("Length of actual: %d", len(data))
+
+		expelems := []string{}
+		actelems := []string{}
+		for _, bb := range DEC16_OUTPUT {
 			expelems = append(expelems, fmt.Sprintf("%#02x", bb))
 		}
 		for _, bb := range data {

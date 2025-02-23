@@ -102,6 +102,29 @@ CP A, 0x65
 CP H
 CP L`
 
+var INC_INPUT = `INC B
+INC D
+INC H
+INC [HL]
+INC C
+INC E
+INC L
+INC A`
+
+var DEC_INPUT = `DEC B
+DEC D
+DEC H
+DEC [HL]
+DEC C
+DEC E
+DEC L
+DEC A`
+
+var OTHER_INPUT = `DAA
+SCF
+CPL
+CCF`
+
 var ADD_OUTPUT = []uint8{
 	// ADD A,B
 	0x80,
@@ -319,4 +342,53 @@ var CP_OUTPUT = []uint8{
 	0xBC,
 	// CP L
 	0xBD,
+}
+
+var INC_OUTPUT = []uint8{
+	// INC B
+	0x04,
+	// INC D
+	0x14,
+	// INC H
+	0x24,
+	// INC [HL]
+	0x34,
+	// INC C
+	0x0C,
+	// INC E
+	0x1C,
+	// INC L
+	0x2C,
+	// // INC A
+	0x3C,
+}
+
+var DEC_OUTPUT = []uint8{
+	// DEC B
+	0x05,
+	// DEC D
+	0x15,
+	// DEC H
+	0x25,
+	// DEC [HL]
+	0x35,
+	// DEC C
+	0x0D,
+	// DEC E
+	0x1D,
+	// DEC L
+	0x2D,
+	// DEC A
+	0x3D,
+}
+
+var OTHER_OUTPUT = []uint8{
+	// DAA
+	0x27,
+	// SCF
+	0x37,
+	// CPL
+	0x2F,
+	// CCF
+	0x3F,
 }

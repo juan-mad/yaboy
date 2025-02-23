@@ -301,15 +301,20 @@ func encodeBitArithmetic(instr string, argStr string) ([]uint8, error) {
 	var opcode uint8
 
 	args := strings.Split(strings.ReplaceAll(strings.TrimSpace(argStr), " ", ""), ",")
+	// When splitting the empty string, apparently we get a slice with only the empty string
+	// we replace that slice by an empty one
+	if len(args) == 1 && args[0] == "" {
+		args = []string{}
+	}
 
 	if len(args) > 2 {
 		return []uint8{}, fmt.Errorf("Unexpected number (%d) of arguments: %s", len(args), args)
 	}
 
-	// if 2 elems but first operand is not A, error
-	if len(args) == 1 && ((args[0] == "A") && (args[0] != "HL")) {
-		return []uint8{}, fmt.Errorf("Invalid ALU operation %s, register A or HL must be first operand: %s", instr, args)
-	}
+	// // if 2 elems but first operand is not A, error
+	// if len(args) == 1 && ((args[0] == "A") && (args[0] != "HL")) {
+	// 	return []uint8{}, fmt.Errorf("Invalid ALU operation %s, register A or HL must be first operand: %s", instr, args)
+	// }
 
 	// if no operands, it must be one of these
 	if len(args) == 0 {
@@ -335,7 +340,6 @@ func encodeBitArithmetic(instr string, argStr string) ([]uint8, error) {
 	if slices.Contains(ALUUNARYOP, instr) {
 		return []uint8{}, fmt.Errorf("Invalid instruction %s with operands: %s", instr, args)
 	}
-
 	// INC and DEC instructions that take exactly one arguments
 	if len(args) == 1 && (instr == "INC" || instr == "DEC") {
 		if Is8BitRegister(args[0]) {

@@ -38,9 +38,9 @@ func EncodeTextFile(inputPath, outputPath string) error {
 	for scanner.Scan() {
 		line := scanner.Text()
 		chunks := strings.Fields(strings.TrimSpace(line))
-		if len(chunks) == 1 {
-			return fmt.Errorf("Cannot interpret input line: %s\n", line)
-		}
+		// if len(chunks) == 1 {
+		// 	return fmt.Errorf("Cannot interpret input line: %s\n", line)
+		// }
 		if IsPrefix(chunks[0]) {
 			// TODO
 		} else {
