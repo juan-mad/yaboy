@@ -78,6 +78,7 @@ func Is8BitRegister(s string) bool {
 // encodeLoadH produces the bytes for the LDH operation, related to a subset of load operations
 // regarding the Accumulator registry A
 func encodeLoadH(argStr string) ([]uint8, error) {
+	fmt.Printf(">%s\n\n\n", argStr)
 	// Function expects that the string can be split in two sides separated by a comma
 	args := strings.Split(strings.ReplaceAll(strings.TrimSpace(argStr), " ", ""), ",")
 	if len(args) != 2 {
@@ -91,8 +92,8 @@ func encodeLoadH(argStr string) ([]uint8, error) {
 	}
 
 	if args[0] == "A" {
-		if args[1][:2] == "0x" && len(args[1]) >= 3 && len(args[1]) <= 4 {
-			nn, err := strconv.ParseUint(args[1][2:], 16, 8)
+		if args[1][:3] == "[0x" && args[1][len(args[1])-1:] == "]" && len(args[1]) >= 5 && len(args[1]) <= 6 {
+			nn, err := strconv.ParseUint(args[1][3:len(args[1])-1], 16, 8)
 			n := uint8(nn)
 			if err != nil {
 				return []uint8{}, fmt.Errorf("Could not parse immediate 8bit hex value %s: %w", args[1], err)
@@ -102,8 +103,8 @@ func encodeLoadH(argStr string) ([]uint8, error) {
 	}
 
 	if args[1] == "A" {
-		if args[0][:2] == "0x" && len(args[0]) >= 3 && len(args[0]) <= 4 {
-			nn, err := strconv.ParseUint(args[0][2:], 16, 8)
+		if args[0][:3] == "[0x" && args[0][len(args[0])-1:] == "]" && len(args[0]) >= 5 && len(args[0]) <= 6 {
+			nn, err := strconv.ParseUint(args[0][3:len(args[0])-1], 16, 8)
 			n := uint8(nn)
 			if err != nil {
 				return []uint8{}, fmt.Errorf("Could not parse immediate 8bit hex value %s: %w", args[0], err)
@@ -149,9 +150,6 @@ func encodeLoad(argStr string) ([]uint8, error) {
 		}
 	}
 
-	if args[1] == "SP" {
-		fmt.Println(args, "AAA", args[0][7:])
-	}
 	if args[1] == "SP" && args[0][:3] == "[0x" && args[0][(len(args[0])-1):] == "]" && len(args[0]) >= 5 && len(args[0]) <= 8 {
 		// try parsing 16bit value
 		nn, err := strconv.ParseUint(args[0][3:len(args[0])-1], 16, 16)

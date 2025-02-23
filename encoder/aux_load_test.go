@@ -1,6 +1,26 @@
 package encoder_test
 
-var LOAD_INPUT string = `LD B,B 
+// var LOAD_INPUT string = `LDH [C], A
+// LDH [0x23],A
+// LDH A,[0x56]
+// LD [0x123F], A
+// LD A, [0xFF0A]`
+//
+// var LOAD_OUTPUT = []uint8{
+// 	0xE2,
+// 	0xE0,
+// 	0x23,
+// 	0xF0,
+// 	0x56,
+// 	0xEA,
+// 	0x3F,
+// 	0x12,
+// 	0xFA,
+// 	0x0A,
+// 	0xFF,
+// }
+
+var LOAD_INPUT string = `LD B,B
 LD B,C
 LD B,D
 LD B,E
@@ -79,13 +99,12 @@ LD C,0x55
 LD E, 0xAA
 LD L, 0xBC
 LD A, 0xBC
-LDH 0x12, A
-LDH A,0xFF
+LDH [0x12], A
+LDH A,[0xFF]
 LDH [C],A
 LDH A,[C]
 LD [0x123F], A
-LD A, [0xFF0A]
-`
+LD A, [0xFF0A]`
 
 var LOAD16_INPUT = `POP BC
 POP DE
@@ -216,6 +235,7 @@ var LOAD_OUTPUT = []uint8{
 	0x12,
 	0x22,
 	0x32,
+
 	// LD B,0x12
 	0x06,
 	0x12,
@@ -248,21 +268,21 @@ var LOAD_OUTPUT = []uint8{
 	// // LD A, 0xBC
 	0x3E,
 	0xBC,
-	// LDH 0x12, A
+	// LDH [0x12], A
 	0xE0,
 	0x12,
-	// LDH A,0xFF
+	// LDH A,[0xFF]
 	0xF0,
 	0xFF,
 	// LDH [C],A
 	0xE2,
 	// LDH A,[C]
 	0xF2,
-	// LD 0x123F, A
+	// LD [0x123F], A
 	0xEA,
 	0x3F,
 	0x12,
-	// LD A, 0xFF0A
+	// LD A, [0xFF0A]
 	0xFA,
 	0x0A,
 	0xFF,

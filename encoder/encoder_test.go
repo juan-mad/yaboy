@@ -60,6 +60,8 @@ func TestLoad(t *testing.T) {
 
 	// decode
 	data, err := enc.ReadBinaryFile(outputFileName)
+	t.Log(data)
+	t.Log(err)
 	if err != nil {
 		t.Fatal("Failed to read LOAD test output")
 	}
