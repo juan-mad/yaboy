@@ -30,6 +30,18 @@ ADC A, 0x5A
 ADC H
 ADC D`
 
+var SUB_INPUT = `SUB A,B
+SUB A,C
+SUB A,D
+SUB A,E
+SUB A,H
+SUB A,L
+SUB A,[HL]
+SUB A,A
+SUB A, 0xA6
+SUB C
+SUB [HL]`
+
 var ADD_OUTPUT = []uint8{
 	// ADD A,B
 	0x80,
@@ -91,4 +103,30 @@ var ADC_OUTPUT = []uint8{
 	0x8C,
 	// ADC D
 	0x8A,
+}
+
+var SUB_OUTPUT = []uint8{
+	// SUB A,B
+	0x90,
+	// SUB A,C
+	0x91,
+	// SUB A,D
+	0x92,
+	// SUB A,E
+	0x93,
+	// SUB A,H
+	0x94,
+	// SUB A,L
+	0x95,
+	// SUB A,[HL]
+	0x96,
+	// SUB A,A
+	0x97,
+	// SUB A, 0xA6
+	0xD6,
+	0xA6,
+	// SUB C
+	0x91,
+	// SUB [HL]
+	0x96,
 }

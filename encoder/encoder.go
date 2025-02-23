@@ -373,7 +373,6 @@ func encodeBitArithmetic(instr string, argStr string) ([]uint8, error) {
 	rightop := args[len(args)-1]
 
 	// operation between operands
-	fmt.Println(instr, args)
 	if Is8BitRegister(rightop) {
 		opcode = (2 << 6) | (ALUMAPPER[instr] << 3) | REGMAPPER[rightop]
 		return []uint8{opcode}, nil
@@ -385,6 +384,8 @@ func encodeBitArithmetic(instr string, argStr string) ([]uint8, error) {
 		return []uint8{opcode}, nil
 	} else {
 		opcode = (3 << 6) | (ALUMAPPER[instr] << 3) | 0x6
+		fmt.Println("aaaa")
+		fmt.Printf("%#02x\n", opcode)
 		if !(rightop[:2] == "0x" && len(rightop) >= 3 && len(rightop) <= 4) {
 			return []uint8{}, fmt.Errorf("Invalid arguments passed: %s", args)
 		}
