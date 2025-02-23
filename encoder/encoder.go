@@ -388,8 +388,6 @@ func encodeBitArithmetic(instr string, argStr string) ([]uint8, error) {
 		return []uint8{opcode}, nil
 	} else {
 		opcode = (3 << 6) | (ALUMAPPER[instr] << 3) | 0x6
-		fmt.Println("aaaa")
-		fmt.Printf("%#02x\n", opcode)
 		if !(rightop[:2] == "0x" && len(rightop) >= 3 && len(rightop) <= 4) {
 			return []uint8{}, fmt.Errorf("Invalid arguments passed: %s", args)
 		}
@@ -424,7 +422,7 @@ func encodeRelativeJump(argStr string) ([]uint8, error) {
 		return []uint8{0x18, n}, nil
 	}
 
-	opcode = (1 << 5) | (FLAGMAPPER[args[1]] << 3)
+	opcode = (1 << 5) | (FLAGMAPPER[args[0]] << 3)
 	return []uint8{opcode, n}, nil
 
 }
@@ -438,31 +436,31 @@ func encodeJump(argStr string) ([]uint8, error) {
 	}
 
 	if len(args) == 1 {
-		if args[1] == "HL" {
+		if args[0] == "HL" {
 			return []uint8{0xE9}, nil
 		}
 	}
 
 	hexStr := args[len(args)-1]
-	if !(hexStr[:2] == "0x" && len(hexStr) >= 3 && len(hexStr) <= 4) {
+	if !(hexStr[:2] == "0x" && len(hexStr) >= 3 && len(hexStr) <= 6) {
 		return []uint8{}, fmt.Errorf("Invalid arguments passed: %s", argStr)
 	}
-	nn, err := strconv.ParseUint(hexStr[2:], 16, 8)
-	n := uint8(nn)
+	nn, err := strconv.ParseUint(hexStr[2:], 16, 16)
+	n := uint16(nn)
 	if err != nil {
-		return []uint8{}, fmt.Errorf("Could not parse immediate 8bit hex value %s: %w", argStr, err)
+		return []uint8{}, fmt.Errorf("Could not parse immediate 16bit hex value %s: %w", argStr, err)
 	}
 
 	if len(args) == 1 {
-		return []uint8{0xC3, n}, nil
+		return []uint8{0xC3, LSB(n), MSB(n)}, nil
 	}
 
-	if !slices.Contains(FLAGS, args[1]) {
+	if !slices.Contains(FLAGS, args[0]) {
 		return []uint8{}, fmt.Errorf("Invalid JP instruction: JP %s", argStr)
 	}
 
-	opcode = 0b11000010 | (FLAGMAPPER[args[1]] << 3)
-	return []uint8{opcode, n}, nil
+	opcode = 0b11000010 | (FLAGMAPPER[args[0]] << 3)
+	return []uint8{opcode, LSB(n), MSB(n)}, nil
 
 }
 
