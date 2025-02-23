@@ -83,8 +83,8 @@ LDH 0x12, A
 LDH A,0xFF
 LDH [C],A
 LDH A,[C]
-LD 0x123F, A
-LD A, 0xFF0A
+LD [0x123F], A
+LD A, [0xFF0A]
 `
 
 var LOAD16_INPUT = `POP BC

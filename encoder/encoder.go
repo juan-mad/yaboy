@@ -162,9 +162,9 @@ func encodeLoad(argStr string) ([]uint8, error) {
 		return []uint8{0x08, LSB(n), MSB(n)}, nil
 	}
 
-	if args[1] == "A" && args[0][:2] == "0x" && len(args[0]) >= 3 && len(args[0]) <= 6 {
+	if args[1] == "A" && args[0][:3] == "[0x" && args[0][(len(args[0])-1):] == "]" && len(args[0]) >= 5 && len(args[0]) <= 8 {
 		// try parsing 16bit value
-		nn, err := strconv.ParseUint(args[0][2:], 16, 16)
+		nn, err := strconv.ParseUint(args[0][3:len(args[0])-1], 16, 16)
 		n := uint16(nn)
 		if err != nil {
 			return []uint8{}, fmt.Errorf("Could not parse immediate 16bit hex value %s: %w", args[0], err)
@@ -172,19 +172,24 @@ func encodeLoad(argStr string) ([]uint8, error) {
 		return []uint8{0xEA, LSB(n), MSB(n)}, nil
 	}
 
-	if args[0] == "A" && args[1][:2] == "0x" && len(args[1]) >= 3 && len(args[1]) <= 6 {
+	if args[0] == "A" && args[1][:3] == "[0x" && args[1][(len(args[1])-1):] == "]" && len(args[1]) >= 5 && len(args[1]) <= 8 {
 		// try parsing 16bit value
-		nn, err := strconv.ParseUint(args[1][2:], 16, 16)
+		nn, err := strconv.ParseUint(args[1][3:len(args[1])-1], 16, 16)
 		n := uint16(nn)
 		if err != nil {
 			return []uint8{}, fmt.Errorf("Could not parse immediate 16bit hex value %s: %w", args[1], err)
 		}
-		// if it fits in 8 bits, we encode as 0x3E, if not, as 0xFA
-		if (n >> 8) == 0 {
-			return []uint8{0x3E, uint8(n)}, nil
-		} else {
-			return []uint8{0xFA, LSB(n), MSB(n)}, nil
+		return []uint8{0xFA, LSB(n), MSB(n)}, nil
+	}
+
+	if args[0] == "A" && args[1][:2] == "0x" && len(args[1]) >= 3 && len(args[1]) <= 6 {
+		// try parsing 16bit value
+		nn, err := strconv.ParseUint(args[1][2:], 16, 8)
+		n := uint8(nn)
+		if err != nil {
+			return []uint8{}, fmt.Errorf("Could not parse immediate 8bit hex value %s: %w", args[1], err)
 		}
+		return []uint8{0x3E, uint8(n)}, nil
 	}
 
 	if len(args[1]) == 3 || len(args[1]) == 4 {
