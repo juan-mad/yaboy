@@ -143,15 +143,15 @@ func encodeLoad(argStr string) ([]uint8, error) {
 			if err != nil {
 				return []uint8{}, fmt.Errorf("Could not parse immediate 16bit hex value %s: %w", args[1], err)
 			}
-			opcode = REGMAPPER[args[0]]<<3 | 0b110
+			opcode = REGMAPPER[args[0]]<<4 | 0b001
 			// little endian order, LSB before MSB
 			return []uint8{opcode, LSB(n), MSB(n)}, nil
 		}
 	}
 
-	if args[1] == "LP" && args[0][:2] == "0x" && len(args[0]) >= 3 && len(args[0]) <= 6 {
+	if args[1] == "SP" && args[0][:2] == "[0x" && args[0][len(args)-1:] == "]" && len(args[0]) >= 5 && len(args[0]) <= 8 {
 		// try parsing 16bit value
-		nn, err := strconv.ParseUint(args[0][2:], 16, 16)
+		nn, err := strconv.ParseUint(args[0][3:len(args)-1], 16, 16)
 		n := uint16(nn)
 		if err != nil {
 			return []uint8{}, fmt.Errorf("Could not parse immediate 16bit hex value %s: %w", args[0], err)

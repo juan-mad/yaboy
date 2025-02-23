@@ -77,7 +77,7 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				if len(chunks) != 2 {
 					return fmt.Errorf("Unexpected split of input line: %s\n", line)
 				}
-				bindata, err := encodePush(chunks[1])
+				bindata, err := encodePop(chunks[1])
 				if err != nil {
 					return err
 				}
