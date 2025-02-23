@@ -1,0 +1,26 @@
+package encoder_test
+
+var MISCROT_INPUT = `NOP
+STOP 0xAF
+HALT
+DI
+EI
+PREFIX
+RLCA
+RLA
+RRCA
+RRA`
+
+var MISCROT_OUTPUT = []uint8{
+	0x00,
+	0x10,
+	0xAF,
+	0x76,
+	0xF3,
+	0xFB,
+	0xCB,
+	0x07,
+	0x17,
+	0x0F,
+	0x1F,
+}
