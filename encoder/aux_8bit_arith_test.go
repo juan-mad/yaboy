@@ -42,6 +42,18 @@ SUB A, 0xA6
 SUB C
 SUB [HL]`
 
+var SBC_INPUT = `SBC A,B
+SBC A,C
+SBC A,D
+SBC A,E
+SBC A,H
+SBC A,L
+SBC A,[HL]
+SBC A,A
+SBC A, 0x55
+SBC L
+SBC [HL]`
+
 var ADD_OUTPUT = []uint8{
 	// ADD A,B
 	0x80,
@@ -129,4 +141,30 @@ var SUB_OUTPUT = []uint8{
 	0x91,
 	// SUB [HL]
 	0x96,
+}
+
+var SBC_OUTPUT = []uint8{
+	// SBC A,B
+	0x98,
+	// SBC A,C
+	0x99,
+	// SBC A,D
+	0x9A,
+	// SBC A,E
+	0x9B,
+	// SBC A,H
+	0x9C,
+	// SBC A,L
+	0x9D,
+	// SBC A,[HL]
+	0x9E,
+	// SBC A,A
+	0x9F,
+	// SBC A, 0x55
+	0xDE,
+	0x55,
+	// SBC L
+	0x9D,
+	// SBC [HL]
+	0x9E,
 }
