@@ -54,6 +54,18 @@ SBC A, 0x55
 SBC L
 SBC [HL]`
 
+var AND_INPUT = `AND A,B
+AND A,C
+AND A,D
+AND A,E
+AND A,H
+AND A,L
+AND A,[HL]
+AND A,A
+AND A, 0x12
+AND C
+AND D`
+
 var ADD_OUTPUT = []uint8{
 	// ADD A,B
 	0x80,
@@ -167,4 +179,30 @@ var SBC_OUTPUT = []uint8{
 	0x9D,
 	// SBC [HL]
 	0x9E,
+}
+
+var AND_OUTPUT = []uint8{
+	// AND A,B
+	0xA0,
+	// AND A,C
+	0xA1,
+	// AND A,D
+	0xA2,
+	// AND A,E
+	0xA3,
+	// AND A,H
+	0xA4,
+	// AND A,L
+	0xA5,
+	// AND A,[HL]
+	0xA6,
+	// AND A,A
+	0xA7,
+	// AND A, 0x12
+	0xE6,
+	0x12,
+	// AND C
+	0xA1,
+	// AND D
+	0xA2,
 }
