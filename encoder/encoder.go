@@ -149,9 +149,12 @@ func encodeLoad(argStr string) ([]uint8, error) {
 		}
 	}
 
-	if args[1] == "SP" && args[0][:2] == "[0x" && args[0][len(args)-1:] == "]" && len(args[0]) >= 5 && len(args[0]) <= 8 {
+	if args[1] == "SP" {
+		fmt.Println(args, "AAA", args[0][7:])
+	}
+	if args[1] == "SP" && args[0][:3] == "[0x" && args[0][(len(args[0])-1):] == "]" && len(args[0]) >= 5 && len(args[0]) <= 8 {
 		// try parsing 16bit value
-		nn, err := strconv.ParseUint(args[0][3:len(args)-1], 16, 16)
+		nn, err := strconv.ParseUint(args[0][3:len(args[0])-1], 16, 16)
 		n := uint16(nn)
 		if err != nil {
 			return []uint8{}, fmt.Errorf("Could not parse immediate 16bit hex value %s: %w", args[0], err)

@@ -98,7 +98,10 @@ PUSH AF
 LD BC,0x7A4F
 LD DE,0x99EE
 LD HL,0x6D4A
-LD SP,0x7FBA`
+LD SP,0x7FBA
+LD HL,SP+0x4E
+LD SP,HL
+LD [0x5BDE],SP`
 
 var LOAD16_OUTPUT = []uint8{
 	// POP BC
@@ -133,6 +136,15 @@ var LOAD16_OUTPUT = []uint8{
 	0x31,
 	0xBA,
 	0x7F,
+	// 	LD HL,SP+0x4E
+	0xF8,
+	0x4E,
+	// LD SP,HL
+	0xF9,
+	// LD [0x5BDE],SP
+	0x08,
+	0xDE,
+	0x5B,
 }
 
 var LOAD_OUTPUT = []uint8{
