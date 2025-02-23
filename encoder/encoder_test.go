@@ -1087,7 +1087,6 @@ func TestPrefix(t *testing.T) {
 
 	// decode
 	data, err := enc.ReadBinaryFile(outputFileName)
-	t.Log(data)
 	if err != nil {
 		t.Fatal("Failed to read prefix instructions test output")
 	}
