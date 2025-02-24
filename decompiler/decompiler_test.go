@@ -386,3 +386,33 @@ func TestBx(t *testing.T) {
 		t.Log("Input: ", inp)
 	}
 }
+
+func TestCx(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,Cx00"
+	inputFileName, err := createInputFile(tempDir, INPUT_Cx)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+	t.Log(inp)
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, OUTPUT_Cx) {
+		t.Errorf("Failed test\n\tExpected: %s\n\tActual:   %s", OUTPUT_Cx, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_Cx))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}

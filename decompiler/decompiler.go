@@ -21,14 +21,14 @@ var ENCODE_COND = map[uint8]string{
 }
 
 var BLOCK2_BITES = map[uint8]string{
-	0b10000: "ADD",
-	0b10001: "ADC",
-	0b10010: "SUB",
-	0b10011: "SBC",
-	0b10100: "AND",
-	0b10101: "XOR",
-	0b10110: "OR",
-	0b10111: "CP",
+	0b000: "ADD",
+	0b001: "ADC",
+	0b010: "SUB",
+	0b011: "SBC",
+	0b100: "AND",
+	0b101: "XOR",
+	0b110: "OR",
+	0b111: "CP",
 }
 
 // formatOutput formats the different pieces of an instruction into a single string
@@ -58,7 +58,7 @@ func DecodeBytes(data []uint8) ([]string, error) {
 	unfInstr := []string{}
 	getNextBytes := 0
 	flipPos := []int8{}
-
+	fmt.Println(data)
 	for _, b := range data {
 		if getNextBytes > 0 {
 			unfInstr = append(unfInstr, strconv.FormatUint(uint64(b), 16))
@@ -190,11 +190,119 @@ func DecodeBytes(data []uint8) ([]string, error) {
 			break
 			// BLOCK 2
 		case (b >> 6) == 0b10:
-			instr := BLOCK2_BITES[(b >> 3)]
+			instr := BLOCK2_BITES[(b>>3)&0b111]
 			reg := ENCODE_R8[(b & 0b111)]
 			output = append(output, fmt.Sprintf("%s A,%s", instr, reg))
+			break
+			// BLOCK 3
+			// ADD A,n16
+		case (b>>6) == 0b11 && ((b & 0b111) == 0b110):
+			instr := BLOCK2_BITES[(b>>3)&0b111]
+			unfInstr = []string{"%s A,0x%02s", instr}
+			getNextBytes = 1
+			break
+			// RET COND
+		case (b>>5) == 0b110 && ((b & 0b111) == 0b000):
+			cond := ENCODE_COND[(b>>3)&0b11]
+			output = append(output, fmt.Sprintf("RET %s", cond))
+			break
+			// RET
+		case b == 0b11001001:
+			output = append(output, "RET")
+			break
+			// RETI
+		case b == 0b11011001:
+			output = append(output, "RETI")
+			break
+			// JP COND,n16
+		case ((b >> 5) == 0b110) && ((b & 0b111) == 0b010):
+			cond := ENCODE_COND[(b>>3)&0b11]
+			unfInstr = []string{"JP %s,0x%02s%02s", cond}
+			getNextBytes = 2
+			flipPos = []int8{2, 3}
+			break
+			// JP n16
+		case b == 0b11000011:
+			unfInstr = []string{"JP 0x%02s%02s"}
+			getNextBytes = 2
+			flipPos = []int8{1, 2}
+			break
+			// JP HL
+		case b == 0b11101001:
+			output = append(output, "JP HL")
+			break
+			// CALL COND,n16
+		case (b>>5) == 0b110 && ((b & 0b111) == 0b100):
+			cond := ENCODE_COND[(b>>3)&0b11]
+			unfInstr = []string{"CALL %s,0x%02s%02s", cond}
+			getNextBytes = 2
+			flipPos = []int8{2, 3}
+			break
+			// CALL n16
+		case b == 0b11001101:
+			unfInstr = []string{"CALL 0x%02s%02s"}
+			getNextBytes = 2
+			flipPos = []int8{1, 2}
+			break
+			// RST
+		case (b>>6) == 0b11 && ((b & 0b111) == 0b111):
+			target := strconv.FormatUint((uint64((b>>3)&0b111) * 8), 16)
+			output = append(output, fmt.Sprintf("RST 0x%02s", target))
+			break
+			// POP
+		case (b>>6) == 0b11 && ((b & 0b1111) == 0b0001):
+			reg := ENCODE_R16STK[(b>>4)&0b11]
+			output = append(output, fmt.Sprintf("POP %s", reg))
+			break
+			// PUSH
+		case (b>>6) == 0b11 && ((b & 0b1111) == 0b0101):
+			reg := ENCODE_R16STK[(b>>4)&0b11]
+			output = append(output, fmt.Sprintf("PUSH %s", reg))
+			break
+		case b == 0b11100010:
+			output = append(output, "LDH [C],A")
+			break
+		case b == 0b11100000:
+			unfInstr = []string{"LDH [0x%02s],A"}
+			getNextBytes = 1
+			break
+		case b == 0b11101010:
+			unfInstr = []string{"LD [0x%02s%02s],A"}
+			getNextBytes = 2
+			flipPos = []int8{1, 2}
+			break
+		case b == 0b11110010:
+			output = append(output, "LDH A,[C]")
+			break
+		case b == 0b11110000:
+			unfInstr = []string{"LDH A,[0x%02s]"}
+			getNextBytes = 1
+			break
+		case b == 0b11111010:
+			unfInstr = []string{"LD A,[0x%02s%02s]"}
+			getNextBytes = 2
+			flipPos = []int8{1, 2}
+			break
+		case b == 0b11101000:
+			unfInstr = []string{"ADD SP,%02s"}
+			getNextBytes = 1
+			break
+		case b == 0b11111000:
+			unfInstr = []string{"LD HL,SP+0x%02s"}
+			getNextBytes = 1
+			break
+		case b == 0b11111001:
+			output = append(output, "LD SP,HL")
+			break
+		case b == 0b11110011:
+			output = append(output, "DI")
+			break
+		case b == 0b11111011:
+			output = append(output, "EI")
+			break
+		default:
+			return []string{}, fmt.Errorf("Can't handle byte: %#02x", b)
 		}
-
 	}
 	return output, nil
 
