@@ -473,3 +473,32 @@ func TestEx(t *testing.T) {
 		t.Log("Input: ", inp)
 	}
 }
+
+func TestFx(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,Fx00"
+	inputFileName, err := createInputFile(tempDir, INPUT_Fx)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, OUTPUT_Fx) {
+		t.Errorf("Failed test\n\tFxpected: %s\n\tActual:   %s", OUTPUT_Fx, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_Fx))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}
