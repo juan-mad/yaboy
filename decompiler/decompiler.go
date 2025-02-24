@@ -284,7 +284,7 @@ func DecodeBytes(data []uint8) ([]string, error) {
 			flipPos = []int8{1, 2}
 			break
 		case b == 0b11101000:
-			unfInstr = []string{"ADD SP,%02s"}
+			unfInstr = []string{"ADD SP,0x%02s"}
 			getNextBytes = 1
 			break
 		case b == 0b11111000:
