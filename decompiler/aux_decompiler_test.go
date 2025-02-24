@@ -771,6 +771,7 @@ var INPUT_Dx = []uint8{
 	0x12,
 	// "SBC A,0x12",
 	0xDE,
+	0x12,
 	// "RST 0x18",
 	0xDF,
 }
@@ -782,7 +783,7 @@ var OUTPUT_Dx = []string{
 	"CALL NC,0x1234",
 	"PUSH DE",
 	"SUB A,0x12",
-	"RES 0x10",
+	"RST 0x10",
 	"RET C",
 	"RETI",
 	"JP C,0x1234",
