@@ -51,6 +51,42 @@ func formatOutput(ss []string, flip []int8) string {
 	return "MAL"
 }
 
+func decodePrefixOpcode(b uint8) (string, error) {
+	reg := ENCODE_R8[b&0b111]
+	top := b >> 6
+	mid := (b >> 3) & 0b111
+
+	switch top {
+	case 0b00:
+		switch mid {
+		case 0b000:
+			return fmt.Sprintf("RLC %s", reg), nil
+		case 0b001:
+			return fmt.Sprintf("RRC %s", reg), nil
+		case 0b010:
+			return fmt.Sprintf("RL %s", reg), nil
+		case 0b011:
+			return fmt.Sprintf("RR %s", reg), nil
+		case 0b100:
+			return fmt.Sprintf("SLA %s", reg), nil
+		case 0b101:
+			return fmt.Sprintf("SRA %s", reg), nil
+		case 0b110:
+			return fmt.Sprintf("SWAP %s", reg), nil
+		case 0b111:
+			return fmt.Sprintf("SRL %s", reg), nil
+		}
+	case 0b01:
+		return fmt.Sprintf("BIT %d,%s", mid, reg), nil
+	case 0b10:
+		return fmt.Sprintf("RES %d,%s", mid, reg), nil
+	case 0b11:
+		return fmt.Sprintf("SET %d,%s", mid, reg), nil
+	}
+
+	return "", nil
+}
+
 // DecodeBytes takes a slice of bytes and returns a slice of strins corresponding to the
 // bytes passed.
 func DecodeBytes(data []uint8) ([]string, error) {
@@ -58,8 +94,19 @@ func DecodeBytes(data []uint8) ([]string, error) {
 	unfInstr := []string{}
 	getNextBytes := 0
 	flipPos := []int8{}
-	fmt.Println(data)
-	for _, b := range data {
+	getNextPrefixByte := false
+	for i, b := range data {
+
+		if getNextPrefixByte {
+			instr, err := decodePrefixOpcode(b)
+			if err != nil {
+				return []string{}, fmt.Errorf("Error decompiling prefix opcode %02x: %w", b, err)
+			}
+			output = append(output, instr)
+			getNextPrefixByte = false
+			continue
+		}
+
 		if getNextBytes > 0 {
 			unfInstr = append(unfInstr, strconv.FormatUint(uint64(b), 16))
 			getNextBytes = getNextBytes - 1
@@ -73,6 +120,9 @@ func DecodeBytes(data []uint8) ([]string, error) {
 		}
 
 		switch {
+		case b == 0xCB:
+			getNextPrefixByte = true
+			break
 		// MISC OPERATIONS
 		case b == 0x00:
 			output = append(output, "NOP")
@@ -83,9 +133,6 @@ func DecodeBytes(data []uint8) ([]string, error) {
 			break
 		case b == 0x76:
 			output = append(output, "HALT")
-			break
-		case b == 0xCB:
-			output = append(output, "PREFIX")
 			break
 		case b == 0xF3:
 			output = append(output, "DI")
@@ -301,7 +348,8 @@ func DecodeBytes(data []uint8) ([]string, error) {
 			output = append(output, "EI")
 			break
 		default:
-			return []string{}, fmt.Errorf("Can't handle byte: %#02x", b)
+			fmt.Printf("Warning: Unmapped byte %#02x at pos %#04x\n", b, i)
+			break
 		}
 	}
 	return output, nil

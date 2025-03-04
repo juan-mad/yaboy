@@ -502,3 +502,467 @@ func TestFx(t *testing.T) {
 		t.Log("Input: ", inp)
 	}
 }
+
+func TestCB0x(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,Fx00"
+	inputFileName, err := createInputFile(tempDir, CB_INPUT_0x)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, CB_OUTPUT_0x) {
+		t.Errorf("Failed test\n\tFxpected: %s\n\tActual:   %s", CB_OUTPUT_0x, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_Fx))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}
+
+func TestCB1x(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,Fx00"
+	inputFileName, err := createInputFile(tempDir, CB_INPUT_1x)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, CB_OUTPUT_1x) {
+		t.Errorf("Failed test\n\tFxpected: %s\n\tActual:   %s", CB_OUTPUT_1x, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_Fx))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}
+
+func TestCB2x(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,Fx00"
+	inputFileName, err := createInputFile(tempDir, CB_INPUT_2x)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, CB_OUTPUT_2x) {
+		t.Errorf("Failed test\n\tFxpected: %s\n\tActual:   %s", CB_OUTPUT_2x, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_Fx))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}
+
+func TestCB3x(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,Fx00"
+	inputFileName, err := createInputFile(tempDir, CB_INPUT_3x)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, CB_OUTPUT_3x) {
+		t.Errorf("Failed test\n\tFxpected: %s\n\tActual:   %s", CB_OUTPUT_3x, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_Fx))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}
+
+func TestCB4x(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,Fx00"
+	inputFileName, err := createInputFile(tempDir, CB_INPUT_4x)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, CB_OUTPUT_4x) {
+		t.Errorf("Failed test\n\tFxpected: %s\n\tActual:   %s", CB_OUTPUT_4x, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_Fx))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}
+
+func TestCB5x(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,Fx00"
+	inputFileName, err := createInputFile(tempDir, CB_INPUT_5x)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, CB_OUTPUT_5x) {
+		t.Errorf("Failed test\n\tFxpected: %s\n\tActual:   %s", CB_OUTPUT_5x, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_Fx))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}
+
+func TestCB6x(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,Fx00"
+	inputFileName, err := createInputFile(tempDir, CB_INPUT_6x)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, CB_OUTPUT_6x) {
+		t.Errorf("Failed test\n\tFxpected: %s\n\tActual:   %s", CB_OUTPUT_6x, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_Fx))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}
+
+func TestCB7x(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,Fx00"
+	inputFileName, err := createInputFile(tempDir, CB_INPUT_7x)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, CB_OUTPUT_7x) {
+		t.Errorf("Failed test\n\tFxpected: %s\n\tActual:   %s", CB_OUTPUT_7x, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_Fx))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}
+
+func TestCB8x(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,Fx00"
+	inputFileName, err := createInputFile(tempDir, CB_INPUT_8x)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, CB_OUTPUT_8x) {
+		t.Errorf("Failed test\n\tFxpected: %s\n\tActual:   %s", CB_OUTPUT_8x, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_Fx))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}
+
+func TestCB9x(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,Fx00"
+	inputFileName, err := createInputFile(tempDir, CB_INPUT_9x)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, CB_OUTPUT_9x) {
+		t.Errorf("Failed test\n\tFxpected: %s\n\tActual:   %s", CB_OUTPUT_9x, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_Fx))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}
+
+func TestCBAx(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,Fx00"
+	inputFileName, err := createInputFile(tempDir, CB_INPUT_Ax)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, CB_OUTPUT_Ax) {
+		t.Errorf("Failed test\n\tFxpected: %s\n\tActual:   %s", CB_OUTPUT_Ax, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_Fx))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}
+
+func TestCBBx(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,Fx00"
+	inputFileName, err := createInputFile(tempDir, CB_INPUT_Bx)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, CB_OUTPUT_Bx) {
+		t.Errorf("Failed test\n\tFxpected: %s\n\tActual:   %s", CB_OUTPUT_Bx, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_Fx))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}
+
+func TestCBCx(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,Fx00"
+	inputFileName, err := createInputFile(tempDir, CB_INPUT_Cx)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, CB_OUTPUT_Cx) {
+		t.Errorf("Failed test\n\tFxpected: %s\n\tActual:   %s", CB_OUTPUT_Cx, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_Fx))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}
+
+func TestCBDx(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,Fx00"
+	inputFileName, err := createInputFile(tempDir, CB_INPUT_Dx)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, CB_OUTPUT_Dx) {
+		t.Errorf("Failed test\n\tFxpected: %s\n\tActual:   %s", CB_OUTPUT_Dx, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_Fx))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}
+
+func TestCBEx(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,Fx00"
+	inputFileName, err := createInputFile(tempDir, CB_INPUT_Ex)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, CB_OUTPUT_Ex) {
+		t.Errorf("Failed test\n\tFxpected: %s\n\tActual:   %s", CB_OUTPUT_Ex, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_Fx))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}
+
+func TestCBFx(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// inp := "LD A,Fx00"
+	inputFileName, err := createInputFile(tempDir, CB_INPUT_Fx)
+	// inputFileName, err := createInputFile(tempDir, inp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// decode
+	inp, err := enc.ReadBinaryFile(inputFileName)
+	if err != nil {
+		t.Fatal("Failed to read input expected test file")
+	}
+
+	// testing
+	actual, err := decompiler.DecodeBytes(inp)
+	if err != nil {
+		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if !slices.Equal(actual, CB_OUTPUT_Fx) {
+		t.Errorf("Failed test\n\tFxpected: %s\n\tActual:   %s", CB_OUTPUT_Fx, actual)
+		t.Logf("Length of expctd: %d", len(OUTPUT_Fx))
+		t.Logf("Length of actual: %d", len(actual))
+		t.Log("Input: ", inp)
+	}
+}
