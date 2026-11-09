@@ -1,10 +1,12 @@
 package encoder
 
-import "os"
-import "io"
-import "fmt"
-import "errors"
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+	"fmt"
+	"io"
+	"os"
+)
 
 func ReadBinaryFile(inputPath string) ([]uint8, error) {
 	data := []uint8{}
@@ -24,7 +26,6 @@ func ReadBinaryFile(inputPath string) ([]uint8, error) {
 			}
 			return data, fmt.Errorf("error reading binary data: %w", err)
 		}
-
 		data = append(data, instruction)
 	}
 

@@ -89,9 +89,9 @@ func Is8BitRegister(s string) bool {
 	return slices.Contains(BIT8REG, s)
 }
 
-// encodeLoadH produces the bytes for the LDH operation, related to a subset of load operations
+// EncodeLoadH produces the bytes for the LDH operation, related to a subset of load operations
 // regarding the Accumulator registry A
-func encodeLoadH(argStr string) ([]uint8, error) {
+func EncodeLoadH(argStr string) ([]uint8, error) {
 	// Function expects that the string can be split in two sides separated by a comma
 	args := strings.Split(strings.ReplaceAll(strings.TrimSpace(argStr), " ", ""), ",")
 	if len(args) != 2 {
@@ -129,8 +129,8 @@ func encodeLoadH(argStr string) ([]uint8, error) {
 	return []uint8{}, fmt.Errorf("Not implemented load instruction: LDH %s", argStr)
 }
 
-// encodeLoad produces the bytes for the LD operation, related to load operations
-func encodeLoad(argStr string) ([]uint8, error) {
+// EncodeLoad produces the bytes for the LD operation, related to load operations
+func EncodeLoad(argStr string) ([]uint8, error) {
 	var opcode uint8
 	// Function expects that the string can be split in two sides separated by a comma
 	args := strings.Split(strings.ReplaceAll(strings.TrimSpace(argStr), " ", ""), ",")
@@ -252,8 +252,8 @@ func encodeLoad(argStr string) ([]uint8, error) {
 	return []uint8{}, fmt.Errorf("Not implemented load instruction: LD %s", argStr)
 }
 
-// encodePush produces the bytes for the PUSH instructions
-func encodePush(argStr string) ([]uint8, error) {
+// EncodePush produces the bytes for the PUSH instructions
+func EncodePush(argStr string) ([]uint8, error) {
 	var opcode uint8
 	if slices.Contains(REGPF, argStr) {
 		opcode = 0b11000101 | (REGMAPPER[argStr] << 4)
@@ -263,8 +263,8 @@ func encodePush(argStr string) ([]uint8, error) {
 	return []uint8{}, fmt.Errorf("Invalid push instruction: PUSH %s", argStr)
 }
 
-// encodePop produces the bytes for the POP instructions
-func encodePop(argStr string) ([]uint8, error) {
+// EncodePop produces the bytes for the POP instructions
+func EncodePop(argStr string) ([]uint8, error) {
 	var opcode uint8
 	if slices.Contains(REGPF, argStr) {
 		opcode = 0b11000001 | (REGMAPPER[argStr] << 4)
@@ -274,9 +274,9 @@ func encodePop(argStr string) ([]uint8, error) {
 	return []uint8{}, fmt.Errorf("Invalid push instruction: POP %s", argStr)
 }
 
-// encodeMisc produces the bytes for miscellaneous instructions
+// EncodeMisc produces the bytes for miscellaneous instructions
 // in particular, STOP, HALT, PREFIX, NOP, EI, DEI
-func encodeMisc(chunks []string) ([]uint8, error) {
+func EncodeMisc(chunks []string) ([]uint8, error) {
 	if len(chunks) > 2 || len(chunks) == 0 {
 		return []uint8{}, fmt.Errorf("chunks argument must have length 1 or 2, found %d", len(chunks))
 	}
@@ -315,8 +315,8 @@ func encodeMisc(chunks []string) ([]uint8, error) {
 	return []uint8{}, fmt.Errorf("Invalid push instruction: %s", chunks)
 }
 
-// encodeBitArithmetic produces the bytes for arithmetic instructions
-func encodeBitArithmetic(instr string, argStr string) ([]uint8, error) {
+// EncodeBitArithmetic produces the bytes for arithmetic instructions
+func EncodeBitArithmetic(instr string, argStr string) ([]uint8, error) {
 	var opcode uint8
 
 	args := strings.Split(strings.ReplaceAll(strings.TrimSpace(argStr), " ", ""), ",")
@@ -419,8 +419,8 @@ func encodeBitArithmetic(instr string, argStr string) ([]uint8, error) {
 	}
 }
 
-// encodeRelativeJump produces the bytes for relative jump instructions, JR
-func encodeRelativeJump(argStr string) ([]uint8, error) {
+// EncodeRelativeJump produces the bytes for relative jump instructions, JR
+func EncodeRelativeJump(argStr string) ([]uint8, error) {
 	var opcode uint8
 	args := strings.Split(strings.ReplaceAll(strings.TrimSpace(argStr), " ", ""), ",")
 	if len(args) == 0 || len(args) > 2 {
@@ -446,8 +446,8 @@ func encodeRelativeJump(argStr string) ([]uint8, error) {
 
 }
 
-// encodeJump produces the bytes for jump instructions, JP
-func encodeJump(argStr string) ([]uint8, error) {
+// EncodeJump produces the bytes for jump instructions, JP
+func EncodeJump(argStr string) ([]uint8, error) {
 	var opcode uint8
 	args := strings.Split(strings.ReplaceAll(strings.TrimSpace(argStr), " ", ""), ",")
 	if len(args) == 0 || len(args) > 2 {
@@ -483,8 +483,8 @@ func encodeJump(argStr string) ([]uint8, error) {
 
 }
 
-// encodeReturn produces the bytes for return instructions, RET and RETI
-func encodeReturn(chunks []string) ([]uint8, error) {
+// EncodeReturn produces the bytes for return instructions, RET and RETI
+func EncodeReturn(chunks []string) ([]uint8, error) {
 	var opcode uint8
 	instr := chunks[0]
 	if len(chunks) > 2 {
@@ -517,8 +517,8 @@ func encodeReturn(chunks []string) ([]uint8, error) {
 	return []uint8{}, fmt.Errorf("Unknown use of encodeReturn: %s", chunks)
 }
 
-// encodeRestart produces the bytes for restart instructions, RST
-func encodeRestart(argStr string) ([]uint8, error) {
+// EncodeRestart produces the bytes for restart instructions, RST
+func EncodeRestart(argStr string) ([]uint8, error) {
 
 	if !(argStr[:2] == "0x" && len(argStr) >= 3 && len(argStr) <= 4) {
 		return []uint8{}, fmt.Errorf("Invalid arguments passed: %s", argStr)
@@ -552,8 +552,8 @@ func encodeRestart(argStr string) ([]uint8, error) {
 
 }
 
-// encodeCall produces the bytes for call instructions, CALL
-func encodeCall(argStr string) ([]uint8, error) {
+// EncodeCall produces the bytes for call instructions, CALL
+func EncodeCall(argStr string) ([]uint8, error) {
 	var opcode uint8
 	args := strings.Split(strings.ReplaceAll(strings.TrimSpace(argStr), " ", ""), ",")
 	if len(args) == 0 || len(args) > 2 {
@@ -582,7 +582,7 @@ func encodeCall(argStr string) ([]uint8, error) {
 	return []uint8{opcode, LSB(n), MSB(n)}, nil
 }
 
-func encodeRotateNoPrefix(instr string) ([]uint8, error) {
+func EncodeRotateNoPrefix(instr string) ([]uint8, error) {
 	switch instr {
 	case "RLCA":
 		return []uint8{0x07}, nil
@@ -597,7 +597,7 @@ func encodeRotateNoPrefix(instr string) ([]uint8, error) {
 	}
 }
 
-func encodePrefixInstructions(instruction, argStr string) ([]uint8, error) {
+func EncodePrefixInstructions(instruction, argStr string) ([]uint8, error) {
 	fmt.Println(instruction, argStr)
 	var opcode uint8
 	args := strings.Split(strings.ReplaceAll(strings.TrimSpace(argStr), " ", ""), ",")

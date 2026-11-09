@@ -1,7 +1,12 @@
 package decompiler
 
-import "fmt"
-import "strconv"
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+	enc "yaboy/encoder"
+)
 
 var ENCODE_R8 = map[uint8]string{
 	0: "B", 1: "C", 2: "D", 3: "E", 4: "H", 5: "L", 6: "[HL]", 7: "A",
@@ -87,7 +92,7 @@ func decodePrefixOpcode(b uint8) (string, error) {
 	return "", nil
 }
 
-// DecodeBytes takes a slice of bytes and returns a slice of strins corresponding to the
+// DecodeBytes takes a slice of bytes and returns a slice of strings corresponding to the
 // bytes passed.
 func DecodeBytes(data []uint8) ([]string, error) {
 	output := []string{}
@@ -354,4 +359,33 @@ func DecodeBytes(data []uint8) ([]string, error) {
 	}
 	return output, nil
 
+}
+
+func decompileBinary() {
+	data, err := enc.ReadBinaryFile(os.Args[1])
+	if err != nil {
+		fmt.Printf("%s\n", err)
+	}
+
+	f, err := os.Create(os.Args[2])
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	writer := bufio.NewWriter(f)
+
+	res, err := DecodeBytes(data)
+	if err != nil {
+		panic(err)
+	}
+
+	for _, s := range res {
+		_, err = writer.WriteString(s + "\n")
+		if err != nil {
+			fmt.Printf("Error writing string output: %s", err)
+			panic(err)
+		}
+		writer.Flush()
+	}
 }

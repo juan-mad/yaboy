@@ -51,7 +51,7 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				return fmt.Errorf("Invalid line: %s", line)
 			}
 			inp := strings.Join(chunks[2:], "")
-			bindata, err := encodePrefixInstructions(instruction, inp)
+			bindata, err := EncodePrefixInstructions(instruction, inp)
 			if err != nil {
 				return err
 			}
@@ -63,7 +63,7 @@ func EncodeTextFile(inputPath, outputPath string) error {
 			switch opcodeString {
 			case "LD":
 				inp := strings.Join(chunks[1:], "")
-				bindata, err := encodeLoad(inp)
+				bindata, err := EncodeLoad(inp)
 				if err != nil {
 					return err
 				}
@@ -71,7 +71,7 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				break
 			case "LDH":
 				inp := strings.Join(chunks[1:], "")
-				bindata, err := encodeLoadH(inp)
+				bindata, err := EncodeLoadH(inp)
 				if err != nil {
 					return err
 				}
@@ -81,7 +81,7 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				if len(chunks) != 2 {
 					return fmt.Errorf("Unexpected split of input line: %s\n", line)
 				}
-				bindata, err := encodePush(chunks[1])
+				bindata, err := EncodePush(chunks[1])
 				if err != nil {
 					return err
 				}
@@ -91,7 +91,7 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				if len(chunks) != 2 {
 					return fmt.Errorf("Unexpected split of input line: %s\n", line)
 				}
-				bindata, err := encodePop(chunks[1])
+				bindata, err := EncodePop(chunks[1])
 				if err != nil {
 					return err
 				}
@@ -101,7 +101,7 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				if len(chunks) > 2 {
 					return fmt.Errorf("Unexpected split of input line: %s\n", line)
 				}
-				bindata, err := encodeMisc(chunks)
+				bindata, err := EncodeMisc(chunks)
 				if err != nil {
 					return err
 				}
@@ -109,7 +109,7 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				break
 			case "ADD", "ADC", "SUB", "SBC", "AND", "XOR", "OR", "CP", "DAA", "SCF", "CPL", "CCF", "INC", "DEC":
 				inp := strings.Join(chunks[1:], "")
-				bindata, err := encodeBitArithmetic(chunks[0], inp)
+				bindata, err := EncodeBitArithmetic(chunks[0], inp)
 				if err != nil {
 					return err
 				}
@@ -123,7 +123,7 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				} else {
 					return fmt.Errorf("Unexpected split of input line: %s\n", line)
 				}
-				bindata, err := encodeRelativeJump(inp)
+				bindata, err := EncodeRelativeJump(inp)
 				if err != nil {
 					return err
 				}
@@ -138,7 +138,7 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				} else {
 					return fmt.Errorf("Unexpected split of input line: %s\n", line)
 				}
-				bindata, err := encodeJump(inp)
+				bindata, err := EncodeJump(inp)
 				if err != nil {
 					return err
 				}
@@ -148,7 +148,7 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				if len(chunks) > 2 {
 					return fmt.Errorf("Unexpected split of input line: %s\n", line)
 				}
-				bindata, err := encodeReturn(chunks)
+				bindata, err := EncodeReturn(chunks)
 				if err != nil {
 					return err
 				}
@@ -158,7 +158,7 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				if len(chunks) != 2 {
 					return fmt.Errorf("Unexpected split of input line: %s\n", line)
 				}
-				bindata, err := encodeRestart(chunks[1])
+				bindata, err := EncodeRestart(chunks[1])
 				if err != nil {
 					return err
 				}
@@ -168,15 +168,13 @@ func EncodeTextFile(inputPath, outputPath string) error {
 				if len(chunks) != 1 {
 					return fmt.Errorf("Unexpected split of input line: %s\n", line)
 				}
-				bindata, err := encodeRotateNoPrefix(chunks[0])
+				bindata, err := EncodeRotateNoPrefix(chunks[0])
 				if err != nil {
 					return err
 				}
 				buf = append(buf, bindata...)
 				break
-
 			}
-
 		}
 	}
 
