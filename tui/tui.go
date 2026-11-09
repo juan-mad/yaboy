@@ -198,7 +198,7 @@ func NewTui(gb *gameboy.GameBoy) *Tui {
 
 	menuTextBox := tview.NewTextView()
 	menuTextBox.SetBorder(true)
-	menuTextBox.SetText("(f) Import binary instructions file\n(x) Execute instructions")
+	menuTextBox.SetText("(f) Import binary instructions file\n(x) Execute instructions\n(m) Close menu")
 	menuPage = menuPage.AddItem(nil, 0, 1, false)
 	menuRow := tview.NewFlex().SetDirection(tview.FlexColumn)
 	menuRow.AddItem(nil, 0, 1, false)
@@ -236,7 +236,7 @@ func NewTui(gb *gameboy.GameBoy) *Tui {
 	tui.UpdateRAMView()
 
 	menuPage.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Key() == tcell.KeyESC && state.menuOpen {
+		if (event.Key() == tcell.KeyESC || event.Rune() == 'm') && state.menuOpen {
 			state.menuOpen = false
 			pages.HidePage(MENU_PAGE)
 			app.SetFocus(previousFocus)
@@ -259,7 +259,10 @@ func NewTui(gb *gameboy.GameBoy) *Tui {
 				pages.HidePage(MENU_PAGE)
 				app.SetFocus(previousFocus)
 			}
-
+		case 'm':
+			state.menuOpen = false
+			pages.HidePage(MENU_PAGE)
+			app.SetFocus(previousFocus)
 		}
 		return event
 	})
