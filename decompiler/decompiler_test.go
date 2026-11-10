@@ -1,13 +1,16 @@
 package decompiler_test
 
-import "os"
-import "fmt"
-import "errors"
-import "encoding/binary"
-import "testing"
-import "slices"
-import "yaboy/decompiler"
-import enc "yaboy/encoder"
+import (
+	"encoding/binary"
+	"errors"
+	"fmt"
+	"os"
+	"slices"
+	"testing"
+	"yaboy/decompiler"
+
+	enc "yaboy/encoder"
+)
 
 func createInputFile(tempDir string, content []uint8) (_ string, err error) {
 	f, err := os.CreateTemp(tempDir, "tempFile")
@@ -55,9 +58,13 @@ func Test0x(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, OUTPUT_0x) {
@@ -84,9 +91,13 @@ func Test1x(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, OUTPUT_1x) {
@@ -113,9 +124,13 @@ func Test2x(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, OUTPUT_2x) {
@@ -142,11 +157,14 @@ func Test3x(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
 	}
 
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
+	}
 	if !slices.Equal(actual, OUTPUT_3x) {
 		t.Errorf("Failed test\n\tExpected: %s\n\tActual:   %s", OUTPUT_3x, actual)
 		t.Logf("Length of expctd: %d", len(OUTPUT_3x))
@@ -171,9 +189,13 @@ func Test4x(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, OUTPUT_4x) {
@@ -200,9 +222,13 @@ func Test5x(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, OUTPUT_5x) {
@@ -229,9 +255,13 @@ func Test6x(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, OUTPUT_6x) {
@@ -258,9 +288,13 @@ func Test7x(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, OUTPUT_7x) {
@@ -287,9 +321,13 @@ func Test8x(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, OUTPUT_8x) {
@@ -316,9 +354,13 @@ func Test9x(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, OUTPUT_9x) {
@@ -345,9 +387,13 @@ func TestAx(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, OUTPUT_Ax) {
@@ -374,9 +420,13 @@ func TestBx(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, OUTPUT_Bx) {
@@ -403,9 +453,13 @@ func TestCx(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, OUTPUT_Cx) {
@@ -432,9 +486,13 @@ func TestDx(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, OUTPUT_Dx) {
@@ -461,9 +519,13 @@ func TestEx(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, OUTPUT_Ex) {
@@ -490,9 +552,13 @@ func TestFx(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, OUTPUT_Fx) {
@@ -519,9 +585,13 @@ func TestCB0x(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, CB_OUTPUT_0x) {
@@ -548,9 +618,13 @@ func TestCB1x(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, CB_OUTPUT_1x) {
@@ -577,9 +651,13 @@ func TestCB2x(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, CB_OUTPUT_2x) {
@@ -606,9 +684,13 @@ func TestCB3x(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, CB_OUTPUT_3x) {
@@ -635,9 +717,13 @@ func TestCB4x(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, CB_OUTPUT_4x) {
@@ -664,9 +750,13 @@ func TestCB5x(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, CB_OUTPUT_5x) {
@@ -693,9 +783,13 @@ func TestCB6x(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, CB_OUTPUT_6x) {
@@ -722,9 +816,13 @@ func TestCB7x(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, CB_OUTPUT_7x) {
@@ -751,9 +849,13 @@ func TestCB8x(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, CB_OUTPUT_8x) {
@@ -780,9 +882,13 @@ func TestCB9x(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, CB_OUTPUT_9x) {
@@ -809,9 +915,13 @@ func TestCBAx(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, CB_OUTPUT_Ax) {
@@ -838,9 +948,13 @@ func TestCBBx(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, CB_OUTPUT_Bx) {
@@ -867,9 +981,13 @@ func TestCBCx(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, CB_OUTPUT_Cx) {
@@ -896,9 +1014,13 @@ func TestCBDx(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, CB_OUTPUT_Dx) {
@@ -925,9 +1047,13 @@ func TestCBEx(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, CB_OUTPUT_Ex) {
@@ -954,9 +1080,13 @@ func TestCBFx(t *testing.T) {
 	}
 
 	// testing
-	actual, err := decompiler.DecodeBytes(inp)
+	actual, lengths, err := decompiler.DecodeBytes(inp)
 	if err != nil {
 		t.Errorf("Error decoding bytes: %s", err)
+	}
+
+	if len(actual) != len(lengths) {
+		t.Errorf("Length of instructions different from length of array of byte lengths")
 	}
 
 	if !slices.Equal(actual, CB_OUTPUT_Fx) {

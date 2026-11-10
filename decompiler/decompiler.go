@@ -93,9 +93,10 @@ func decodePrefixOpcode(b uint8) (string, error) {
 }
 
 // DecodeBytes takes a slice of bytes and returns a slice of strings corresponding to the
-// bytes passed.
-func DecodeBytes(data []uint8) ([]string, error) {
+// bytes passed, together with a slice of uint8 with the length in bytes of each instruction.
+func DecodeBytes(data []uint8) ([]string, []uint8, error) {
 	output := []string{}
+	length := []uint8{}
 	unfInstr := []string{}
 	getNextBytes := 0
 	flipPos := []int8{}
@@ -105,7 +106,7 @@ func DecodeBytes(data []uint8) ([]string, error) {
 		if getNextPrefixByte {
 			instr, err := decodePrefixOpcode(b)
 			if err != nil {
-				return []string{}, fmt.Errorf("Error decompiling prefix opcode %02x: %w", b, err)
+				return []string{}, []uint8{}, fmt.Errorf("Error decompiling prefix opcode %02x: %w", b, err)
 			}
 			output = append(output, instr)
 			getNextPrefixByte = false
@@ -354,10 +355,25 @@ func DecodeBytes(data []uint8) ([]string, error) {
 			break
 		default:
 			fmt.Printf("Warning: Unmapped byte %#02x at pos %#04x\n", b, i)
+			output = append(output, "")
 			break
 		}
+		if getNextPrefixByte {
+			length = append(length, 2)
+		} else {
+			length = append(length, uint8(getNextBytes)+1)
+		}
+
 	}
-	return output, nil
+
+	if getNextPrefixByte {
+		return nil, nil, fmt.Errorf("Incomplete instruction: missing byte after 0xCB")
+	}
+	if getNextBytes > 0 {
+		return nil, nil, fmt.Errorf("Incomplete instruction, missig %d operand byte(s)", getNextBytes)
+	}
+
+	return output, length, nil
 
 }
 
@@ -375,7 +391,7 @@ func decompileBinary() {
 
 	writer := bufio.NewWriter(f)
 
-	res, err := DecodeBytes(data)
+	res, _, err := DecodeBytes(data)
 	if err != nil {
 		panic(err)
 	}
