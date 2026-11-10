@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"yaboy/decompiler"
 	enc "yaboy/encoder"
@@ -18,6 +19,12 @@ type ImportBinaryInstructionsPage struct {
 	lengths      []uint8
 }
 
+type InputMemoryAddressPage struct {
+	page          *tview.Flex
+	inputBox      *tview.InputField
+	memoryAddress uint16
+}
+
 // loadBinaryInstructions loads a binary file containing instructions. Returns a slice of string.
 func loadBinaryInstructions(path string) ([]uint8, []string, []uint8) {
 	opcodes, err := enc.ReadBinaryFile(path)
@@ -32,7 +39,7 @@ func loadBinaryInstructions(path string) ([]uint8, []string, []uint8) {
 
 }
 
-func createImportBinaryPage(t *Tui) ImportBinaryInstructionsPage {
+func createImportBinaryPage(tui *Tui) ImportBinaryInstructionsPage {
 	inputBox := tview.NewInputField().
 		SetLabel("Enter file name: ").
 		SetFieldWidth(0).
@@ -58,13 +65,13 @@ func createImportBinaryPage(t *Tui) ImportBinaryInstructionsPage {
 	inputBox.SetDoneFunc(func(key tcell.Key) {
 		if key == tcell.KeyEnter {
 			value := inputBox.GetText()
-			t.pages.HidePage(IMPORT_BINARY_INSTRUCTIONS_PAGE)
-			t.app.SetFocus(*t.state.previousFocus)
+			tui.pages.HidePage(IMPORT_BINARY_INSTRUCTIONS_PAGE)
+			tui.app.SetFocus(*tui.state.previousFocus)
 
 			opcodes, instructions, lengths := loadBinaryInstructions(value)
-			inputPage.opcodes = opcodes
-			inputPage.instructions = instructions
-			inputPage.lengths = lengths
+			tui.importBinaryInstructionsPage.opcodes = opcodes
+			tui.importBinaryInstructionsPage.instructions = instructions
+			tui.importBinaryInstructionsPage.lengths = lengths
 
 			var text strings.Builder
 
@@ -84,11 +91,12 @@ func createImportBinaryPage(t *Tui) ImportBinaryInstructionsPage {
 				// fmt.Fprintf(&text, "[\"%d\"][%#04x]\t%#02x\t(%s)[\"\"]\n", i, i, opcodes[i], instructions[i])
 			}
 
-			t.mainPage.readingBox.SetText(text.String())
+			tui.mainPage.readingBox.SetText(text.String())
+			tui.state.importedInstructions = true
 
 		} else if key == tcell.KeyESC {
-			t.pages.HidePage(IMPORT_BINARY_INSTRUCTIONS_PAGE)
-			t.app.SetFocus(*t.state.previousFocus)
+			tui.pages.HidePage(IMPORT_BINARY_INSTRUCTIONS_PAGE)
+			tui.app.SetFocus(*tui.state.previousFocus)
 		} else {
 			return
 		}
@@ -98,4 +106,57 @@ func createImportBinaryPage(t *Tui) ImportBinaryInstructionsPage {
 	})
 
 	return inputPage
+}
+
+func createInputMemoryAddressPage(tui *Tui) InputMemoryAddressPage {
+	inputBox := tview.NewInputField().
+		SetLabel("Enter address in 0xXXXX format: ").
+		SetFieldWidth(0).
+		SetFieldBackgroundColor(tcell.ColorDarkGrey).
+		SetFieldTextColor(tcell.ColorBlack)
+	inputBox.SetBorder(true).SetTitle("Load data starting at memory address")
+
+	inputBoxRow := tview.NewFlex().SetDirection(tview.FlexColumn)
+	inputBoxRow.AddItem(nil, 0, 1, false).AddItem(inputBox, 0, 1, true).AddItem(nil, 0, 1, false)
+
+	page := tview.NewFlex().SetDirection(tview.FlexRow)
+	page.AddItem(nil, 0, 1, false).AddItem(inputBoxRow, 0, 1, true).AddItem(nil, 0, 1, false)
+
+	memaddrPage := InputMemoryAddressPage{
+		page:     page,
+		inputBox: inputBox,
+	}
+
+	inputBox.SetDoneFunc(func(key tcell.Key) {
+		if key == tcell.KeyEnter {
+			value := inputBox.GetText()
+			bigaddress, err := strconv.ParseUint(value, 0, 16)
+			if err != nil {
+				panic(err)
+				// inputBox.SetPlaceholder("could not parsing")
+				// return
+			}
+			address := uint16(bigaddress)
+
+			if address+uint16(len(tui.importBinaryInstructionsPage.opcodes)) > uint16(len(tui.gameboy.RAM)) {
+				inputBox.SetPlaceholder("no space!")
+				return
+
+			}
+
+			inputBox.SetPlaceholder("")
+			tui.pages.HidePage(INPUT_MEMORY_ADDRESS_PAGE)
+			tui.app.SetFocus(*tui.state.previousFocus)
+
+			tui.inputMemoryAddressPage.memoryAddress = address
+			for i, opcode := range tui.importBinaryInstructionsPage.opcodes {
+				tui.gameboy.RAM[address+uint16(i)] = opcode
+			}
+
+			tui.UpdateRAMView(true)
+
+		}
+	})
+
+	return memaddrPage
 }

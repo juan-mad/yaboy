@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"yaboy/gameboy"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
@@ -46,7 +47,7 @@ func initRegisterTables(reg gameboy.CPURegisters) (*tview.Table, *tview.Table) {
 	return tab1, tab2
 }
 
-func createMainPage(t *Tui) MainPage {
+func createMainPage(tui *Tui) MainPage {
 	var page = tview.NewFlex().SetDirection(tview.FlexColumn)
 	var informationText = `Press (m) to open the action menu.`
 
@@ -67,7 +68,7 @@ func createMainPage(t *Tui) MainPage {
 	// Registers
 	registerBox := tview.NewFlex().SetDirection(tview.FlexRow)
 	registerBox.SetBorder(true).SetTitle("Registers")
-	tab1, tab2 := initRegisterTables(t.gameboy.Reg)
+	tab1, tab2 := initRegisterTables(tui.gameboy.Reg)
 	registerBox.AddItem(tab1, 0, 2, false).AddItem(tab2, 0, 1, false)
 
 	ramView := tview.NewTextView().
@@ -75,7 +76,7 @@ func createMainPage(t *Tui) MainPage {
 		SetRegions(true).
 		SetWordWrap(true).
 		SetChangedFunc(func() {
-			t.app.Draw()
+			tui.app.Draw()
 		})
 	ramView.SetBorder(true)
 
@@ -94,8 +95,51 @@ func createMainPage(t *Tui) MainPage {
 		ramView:     ramView,
 	}
 
-	t.pages.AddPage(MAIN_PAGE, page, true, true)
+	tui.pages.AddPage(MAIN_PAGE, page, true, true)
 
+	mainPage.page.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if tui.state.menuOpen {
+			return event
+		}
+
+		// if state.executingInstructions {
+		// 	switch r := event.Rune(); r {
+		// 	case 'n':
+		// 		readingBox.positionNumber = readingBox.positionNumber + 1
+		// 		if readingBox.positionNumber == len(readingBox.instructions)+1 {
+		// 			state.executingInstructions = false
+		// 		}
+		// 		readingBox.DisplayInstructions(state)
+		// 		return event
+		// 	}
+		// }
+
+		switch r := event.Rune(); r {
+		case 'q':
+			// if !instrField.HasFocus() {
+			tui.app.Stop()
+			// }
+		case 'm':
+			focus := tui.app.GetFocus()
+			tui.state.previousFocus = &focus
+			tui.pages.ShowPage(MENU_PAGE).SendToFront(MENU_PAGE)
+			tui.state.menuOpen = true
+			tui.app.SetFocus(tui.menuPage.page)
+			return nil
+			// app.SetFocus(menuTextBox)
+
+			// app.SetFocus(menu_list)
+
+			// case 's':
+			// 	ramView.ScrollToHighlight()
+			// case 'r':
+			// 	app.SetFocus(ramView)
+			// case 'i':
+			// 	ramView.Highlight("123")
+		}
+
+		return event
+	})
 	return mainPage
 }
 

@@ -356,7 +356,6 @@ func DecodeBytes(data []uint8) ([]string, []uint8, error) {
 		default:
 			fmt.Printf("Warning: Unmapped byte %#02x at pos %#04x\n", b, i)
 			output = append(output, "")
-			break
 		}
 		if getNextPrefixByte {
 			length = append(length, 2)
