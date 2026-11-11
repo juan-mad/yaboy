@@ -13,6 +13,7 @@ const MAIN_PAGE = "main-page"
 const MENU_PAGE = "menu-page"
 const IMPORT_BINARY_INSTRUCTIONS_PAGE = "import-bin-instructions-page"
 const INPUT_MEMORY_ADDRESS_PAGE = "memory-address-page"
+const SET_STACK_POINTER_MEMORY_ADDRESS_PAGE = "set-stack-pointer-at-memory-address-page"
 
 type State struct {
 	menuOpen             bool
@@ -30,6 +31,7 @@ type Tui struct {
 	menuPage                     MenuPage
 	importBinaryInstructionsPage ImportBinaryInstructionsPage
 	inputMemoryAddressPage       InputMemoryAddressPage
+	setStackPointerPage          SetStackPointerAtMemoryAddressPage
 }
 
 func (tui *Tui) UpdateRAMView(includeInstructions bool) {
@@ -61,6 +63,29 @@ func (tui *Tui) UpdateRAMView(includeInstructions bool) {
 	}
 	tui.mainPage.ramView.SetText(text.String())
 }
+func (tui *Tui) UpdateRegisterTables() {
+	tui.mainPage.tab1.SetCell(0, 0, tview.NewTableCell("A").SetAlign(tview.AlignCenter))
+	tui.mainPage.tab1.SetCell(0, 1, tview.NewTableCell(fmt.Sprintf("%08b", tui.gameboy.Reg.ReadA())).SetAlign(tview.AlignCenter).SetExpansion(1))
+	tui.mainPage.tab1.SetCell(0, 2, tview.NewTableCell("F").SetAlign(tview.AlignCenter))
+	tui.mainPage.tab1.SetCell(0, 3, tview.NewTableCell(fmt.Sprintf("%08b", tui.gameboy.Reg.ReadF())).SetAlign(tview.AlignCenter).SetExpansion(1))
+	tui.mainPage.tab1.SetCell(1, 0, tview.NewTableCell("B").SetAlign(tview.AlignCenter))
+	tui.mainPage.tab1.SetCell(1, 1, tview.NewTableCell(fmt.Sprintf("%08b", tui.gameboy.Reg.ReadB())).SetAlign(tview.AlignCenter).SetExpansion(1))
+	tui.mainPage.tab1.SetCell(1, 2, tview.NewTableCell("C").SetAlign(tview.AlignCenter))
+	tui.mainPage.tab1.SetCell(1, 3, tview.NewTableCell(fmt.Sprintf("%08b", tui.gameboy.Reg.ReadC())).SetAlign(tview.AlignCenter).SetExpansion(1))
+	tui.mainPage.tab1.SetCell(2, 0, tview.NewTableCell("D").SetAlign(tview.AlignCenter))
+	tui.mainPage.tab1.SetCell(2, 1, tview.NewTableCell(fmt.Sprintf("%08b", tui.gameboy.Reg.ReadD())).SetAlign(tview.AlignCenter).SetExpansion(1))
+	tui.mainPage.tab1.SetCell(2, 2, tview.NewTableCell("E").SetAlign(tview.AlignCenter))
+	tui.mainPage.tab1.SetCell(2, 3, tview.NewTableCell(fmt.Sprintf("%08b", tui.gameboy.Reg.ReadE())).SetAlign(tview.AlignCenter).SetExpansion(1))
+	tui.mainPage.tab1.SetCell(3, 0, tview.NewTableCell("H").SetAlign(tview.AlignCenter))
+	tui.mainPage.tab1.SetCell(3, 1, tview.NewTableCell(fmt.Sprintf("%08b", tui.gameboy.Reg.ReadH())).SetAlign(tview.AlignCenter).SetExpansion(1))
+	tui.mainPage.tab1.SetCell(3, 2, tview.NewTableCell("L").SetAlign(tview.AlignCenter))
+	tui.mainPage.tab1.SetCell(3, 3, tview.NewTableCell(fmt.Sprintf("%08b", tui.gameboy.Reg.ReadL())).SetAlign(tview.AlignCenter).SetExpansion(1))
+
+	tui.mainPage.tab2.SetCell(0, 0, tview.NewTableCell("SP").SetAlign(tview.AlignCenter))
+	tui.mainPage.tab2.SetCell(0, 1, tview.NewTableCell(fmt.Sprintf("%016b", tui.gameboy.Reg.ReadSP())).SetAlign(tview.AlignCenter).SetExpansion(1))
+	tui.mainPage.tab2.SetCell(1, 0, tview.NewTableCell("PC").SetAlign(tview.AlignCenter))
+	tui.mainPage.tab2.SetCell(1, 1, tview.NewTableCell(fmt.Sprintf("%016b", tui.gameboy.Reg.ReadPC())).SetAlign(tview.AlignCenter).SetExpansion(1))
+}
 
 // newTui returns a new tview application for the terminal UI
 func NewTui(gb *gameboy.GameBoy) *Tui {
@@ -87,12 +112,17 @@ func NewTui(gb *gameboy.GameBoy) *Tui {
 	inputMemoryAddressPage := createInputMemoryAddressPage(tui)
 	tui.inputMemoryAddressPage = inputMemoryAddressPage
 
+	setStackPointerPage := createSetStackPointerAtMemoryAddress(tui)
+	tui.setStackPointerPage = setStackPointerPage
+
 	pages.AddPage(MAIN_PAGE, mainPage.page, true, true)
 	pages.AddPage(MENU_PAGE, menuPage.page, true, false)
 	pages.AddPage(IMPORT_BINARY_INSTRUCTIONS_PAGE, importBinaryInstructionsPage.page, true, false)
 	pages.AddPage(INPUT_MEMORY_ADDRESS_PAGE, inputMemoryAddressPage.page, true, false)
+	pages.AddPage(SET_STACK_POINTER_MEMORY_ADDRESS_PAGE, setStackPointerPage.page, true, false)
 
 	tui.UpdateRAMView(false)
+	tui.UpdateRegisterTables()
 
 	return tui
 }

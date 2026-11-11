@@ -1,9 +1,6 @@
 package tui
 
 import (
-	"fmt"
-	"yaboy/gameboy"
-
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -16,35 +13,6 @@ type MainPage struct {
 	tab1        *tview.Table
 	tab2        *tview.Table
 	ramView     *tview.TextView
-}
-
-// initRegisterTables creates the tview Tables that will show the CPU registers
-func initRegisterTables(reg gameboy.CPURegisters) (*tview.Table, *tview.Table) {
-	tab1 := tview.NewTable()
-	tab1.SetCell(0, 0, tview.NewTableCell("A").SetAlign(tview.AlignCenter))
-	tab1.SetCell(0, 1, tview.NewTableCell(fmt.Sprintf("%08b", reg.ReadA())).SetAlign(tview.AlignCenter).SetExpansion(1))
-	tab1.SetCell(0, 2, tview.NewTableCell("F").SetAlign(tview.AlignCenter))
-	tab1.SetCell(0, 3, tview.NewTableCell(fmt.Sprintf("%08b", reg.ReadF())).SetAlign(tview.AlignCenter).SetExpansion(1))
-	tab1.SetCell(1, 0, tview.NewTableCell("B").SetAlign(tview.AlignCenter))
-	tab1.SetCell(1, 1, tview.NewTableCell(fmt.Sprintf("%08b", reg.ReadB())).SetAlign(tview.AlignCenter).SetExpansion(1))
-	tab1.SetCell(1, 2, tview.NewTableCell("C").SetAlign(tview.AlignCenter))
-	tab1.SetCell(1, 3, tview.NewTableCell(fmt.Sprintf("%08b", reg.ReadC())).SetAlign(tview.AlignCenter).SetExpansion(1))
-	tab1.SetCell(2, 0, tview.NewTableCell("D").SetAlign(tview.AlignCenter))
-	tab1.SetCell(2, 1, tview.NewTableCell(fmt.Sprintf("%08b", reg.ReadD())).SetAlign(tview.AlignCenter).SetExpansion(1))
-	tab1.SetCell(2, 2, tview.NewTableCell("E").SetAlign(tview.AlignCenter))
-	tab1.SetCell(2, 3, tview.NewTableCell(fmt.Sprintf("%08b", reg.ReadE())).SetAlign(tview.AlignCenter).SetExpansion(1))
-	tab1.SetCell(3, 0, tview.NewTableCell("H").SetAlign(tview.AlignCenter))
-	tab1.SetCell(3, 1, tview.NewTableCell(fmt.Sprintf("%08b", reg.ReadH())).SetAlign(tview.AlignCenter).SetExpansion(1))
-	tab1.SetCell(3, 2, tview.NewTableCell("L").SetAlign(tview.AlignCenter))
-	tab1.SetCell(3, 3, tview.NewTableCell(fmt.Sprintf("%08b", reg.ReadL())).SetAlign(tview.AlignCenter).SetExpansion(1))
-
-	tab2 := tview.NewTable()
-	tab2.SetCell(0, 0, tview.NewTableCell("SP").SetAlign(tview.AlignCenter))
-	tab2.SetCell(0, 1, tview.NewTableCell(fmt.Sprintf("%016b", reg.ReadSP())).SetAlign(tview.AlignCenter).SetExpansion(1))
-	tab2.SetCell(1, 0, tview.NewTableCell("PC").SetAlign(tview.AlignCenter))
-	tab2.SetCell(1, 1, tview.NewTableCell(fmt.Sprintf("%016b", reg.ReadPC())).SetAlign(tview.AlignCenter).SetExpansion(1))
-
-	return tab1, tab2
 }
 
 func createMainPage(tui *Tui) MainPage {
@@ -68,7 +36,9 @@ func createMainPage(tui *Tui) MainPage {
 	// Registers
 	registerBox := tview.NewFlex().SetDirection(tview.FlexRow)
 	registerBox.SetBorder(true).SetTitle("Registers")
-	tab1, tab2 := initRegisterTables(tui.gameboy.Reg)
+	tab1 := tview.NewTable()
+	tab2 := tview.NewTable()
+
 	registerBox.AddItem(tab1, 0, 2, false).AddItem(tab2, 0, 1, false)
 
 	ramView := tview.NewTextView().
