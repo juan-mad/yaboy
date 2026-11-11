@@ -9,7 +9,7 @@ type CPURegisters struct {
 	PC uint16
 }
 
-type Ram [0xFFFF]uint8
+type Ram [1 << 16]uint8
 
 type GameBoy struct {
 	RAM                Ram

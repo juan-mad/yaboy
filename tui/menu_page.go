@@ -14,6 +14,7 @@ func createMenuPage(tui *Tui) MenuPage {
 	var menuText = `(f) Import binary instructions file
 (x) Execute instructions
 (l) Load instructions to specific address
+(s) Move stack pointer (SP) to specific address
 (m) Close the menu`
 
 	var menuPage = MenuPage{page: page}
@@ -49,6 +50,12 @@ func createMenuPage(tui *Tui) MenuPage {
 			tui.pages.HidePage(MENU_PAGE)
 			tui.state.menuOpen = false
 			tui.app.SetFocus(tui.importBinaryInstructionsPage.inputBox)
+		case 's':
+			tui.setStackPointerPage.inputBox.SetText("")
+			tui.pages.ShowPage(SET_STACK_POINTER_MEMORY_ADDRESS_PAGE).SendToFront(SET_STACK_POINTER_MEMORY_ADDRESS_PAGE)
+			tui.pages.HidePage(MENU_PAGE)
+			tui.state.menuOpen = false
+			tui.app.SetFocus(tui.setStackPointerPage.inputBox)
 		case 'm':
 			tui.state.menuOpen = false
 			tui.pages.HidePage(MENU_PAGE)

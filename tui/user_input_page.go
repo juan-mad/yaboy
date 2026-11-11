@@ -25,6 +25,12 @@ type InputMemoryAddressPage struct {
 	memoryAddress uint16
 }
 
+type SetStackPointerAtMemoryAddressPage struct {
+	page          *tview.Flex
+	inputBox      *tview.InputField
+	memoryAddress uint16
+}
+
 // loadBinaryInstructions loads a binary file containing instructions. Returns a slice of string.
 func loadBinaryInstructions(path string) ([]uint8, []string, []uint8) {
 	opcodes, err := enc.ReadBinaryFile(path)
@@ -138,7 +144,8 @@ func createInputMemoryAddressPage(tui *Tui) InputMemoryAddressPage {
 			}
 			address := uint16(bigaddress)
 
-			if address+uint16(len(tui.importBinaryInstructionsPage.opcodes)) > uint16(len(tui.gameboy.RAM)) {
+			if int(address)+len(tui.importBinaryInstructionsPage.opcodes) > len(tui.gameboy.RAM) {
+
 				inputBox.SetPlaceholder("no space!")
 				return
 
@@ -159,4 +166,44 @@ func createInputMemoryAddressPage(tui *Tui) InputMemoryAddressPage {
 	})
 
 	return memaddrPage
+}
+
+func createSetStackPointerAtMemoryAddress(tui *Tui) SetStackPointerAtMemoryAddressPage {
+	inputBox := tview.NewInputField().
+		SetLabel("Enter address in 0xXXXX format: ").
+		SetFieldWidth(0).
+		SetFieldBackgroundColor(tcell.ColorDarkGrey).
+		SetFieldTextColor(tcell.ColorBlack)
+	inputBox.SetBorder(true).SetTitle("Set Stack Pointer memory address")
+
+	inputBoxRow := tview.NewFlex().SetDirection(tview.FlexColumn)
+	inputBoxRow.AddItem(nil, 0, 1, false).AddItem(inputBox, 0, 1, true).AddItem(nil, 0, 1, false)
+
+	page := tview.NewFlex().SetDirection(tview.FlexRow)
+	page.AddItem(nil, 0, 1, false).AddItem(inputBoxRow, 0, 1, true).AddItem(nil, 0, 1, false)
+
+	setSPPage := SetStackPointerAtMemoryAddressPage{
+		page:     page,
+		inputBox: inputBox,
+	}
+
+	inputBox.SetDoneFunc(func(key tcell.Key) {
+		if key == tcell.KeyEnter {
+			value := inputBox.GetText()
+			bigaddress, err := strconv.ParseUint(value, 0, 16)
+			if err != nil {
+				panic(err)
+			}
+			address := uint16(bigaddress)
+
+			tui.pages.HidePage(SET_STACK_POINTER_MEMORY_ADDRESS_PAGE)
+			tui.app.SetFocus(*tui.state.previousFocus)
+
+			tui.gameboy.Reg.WriteSP(address)
+			tui.UpdateRegisterTables()
+		}
+	})
+
+	return setSPPage
+
 }

@@ -101,7 +101,7 @@ func DecodeBytes(data []uint8) ([]string, []uint8, error) {
 	getNextBytes := 0
 	flipPos := []int8{}
 	getNextPrefixByte := false
-	for i, b := range data {
+	for _, b := range data {
 
 		if getNextPrefixByte {
 			instr, err := decodePrefixOpcode(b)
@@ -354,8 +354,7 @@ func DecodeBytes(data []uint8) ([]string, []uint8, error) {
 			output = append(output, "EI")
 			break
 		default:
-			fmt.Printf("Warning: Unmapped byte %#02x at pos %#04x\n", b, i)
-			output = append(output, "")
+			output = append(output, "NOT_IMPL")
 		}
 		if getNextPrefixByte {
 			length = append(length, 2)
