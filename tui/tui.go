@@ -6,6 +6,7 @@ import (
 	"yaboy/decompiler"
 	"yaboy/gameboy"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
@@ -42,7 +43,11 @@ func (tui *Tui) UpdateRAMView(includeInstructions bool) {
 	var text strings.Builder
 	if !includeInstructions {
 		for i, v := range tui.gameboy.RAM {
-			fmt.Fprintf(&text, "[\"%d\"][%#04x]\t%#02x\n", i, i, v)
+			if i == int(tui.gameboy.Reg.ReadSP()) {
+				fmt.Fprintf(&text, "[\"%d\"][black:#98DCF5][%#04x]\t%#02x[-:-:-:-]\n", i, i, v)
+			} else {
+				fmt.Fprintf(&text, "[\"%d\"][%#04x]\t%#02x\n", i, i, v)
+			}
 		}
 	} else {
 		opcodes := tui.gameboy.RAM[:]
@@ -52,10 +57,18 @@ func (tui *Tui) UpdateRAMView(includeInstructions bool) {
 		}
 		address := 0
 		for i, instruction := range instructions {
-			fmt.Fprintf(&text, "[\"%d\"][%#04x]\t%#02x\t\t%s", address, address, opcodes[address], tview.Escape(instruction))
+			if address == int(tui.gameboy.Reg.ReadSP()) {
+				fmt.Fprintf(&text, "[\"%d\"][black:#27bef5][%#04x]\t%#02x\t\t%s[-:-:-:-]", address, address, opcodes[address], tview.Escape(instruction))
+			} else {
+				fmt.Fprintf(&text, "[\"%d\"][%#04x]\t%#02x\t\t%s", address, address, opcodes[address], tview.Escape(instruction))
+			}
 			for offset := 1; offset < int(lengths[i]); offset++ {
 				operandAddress := address + offset
-				fmt.Fprintf(&text, "\n[%#04x]\t%#02x", operandAddress, opcodes[operandAddress])
+				if operandAddress == int(tui.gameboy.Reg.ReadSP()) {
+					fmt.Fprintf(&text, "\n[black:#27bef5][%#04x]\t%#02x[-:-:-:-]", operandAddress, opcodes[operandAddress])
+				} else {
+					fmt.Fprintf(&text, "\n[%#04x]\t%#02x", operandAddress, opcodes[operandAddress])
+				}
 			}
 			fmt.Fprintf(&text, "[\"\"]\n")
 			address += int(lengths[i])
@@ -63,6 +76,7 @@ func (tui *Tui) UpdateRAMView(includeInstructions bool) {
 	}
 	tui.mainPage.ramView.SetText(text.String())
 }
+
 func (tui *Tui) UpdateRegisterTables() {
 	tui.mainPage.tab1.SetCell(0, 0, tview.NewTableCell("A").SetAlign(tview.AlignCenter))
 	tui.mainPage.tab1.SetCell(0, 1, tview.NewTableCell(fmt.Sprintf("%08b", tui.gameboy.Reg.ReadA())).SetAlign(tview.AlignCenter).SetExpansion(1))
@@ -81,10 +95,18 @@ func (tui *Tui) UpdateRegisterTables() {
 	tui.mainPage.tab1.SetCell(3, 2, tview.NewTableCell("L").SetAlign(tview.AlignCenter))
 	tui.mainPage.tab1.SetCell(3, 3, tview.NewTableCell(fmt.Sprintf("%08b", tui.gameboy.Reg.ReadL())).SetAlign(tview.AlignCenter).SetExpansion(1))
 
+	sp := tui.gameboy.Reg.ReadSP()
+	pc := tui.gameboy.Reg.ReadPC()
 	tui.mainPage.tab2.SetCell(0, 0, tview.NewTableCell("SP").SetAlign(tview.AlignCenter))
-	tui.mainPage.tab2.SetCell(0, 1, tview.NewTableCell(fmt.Sprintf("%016b", tui.gameboy.Reg.ReadSP())).SetAlign(tview.AlignCenter).SetExpansion(1))
+	tui.mainPage.tab2.SetCell(0, 1, tview.NewTableCell(fmt.Sprintf("%016b    %#04x", sp, sp)).
+		SetAlign(tview.AlignCenter).
+		SetExpansion(1).
+		SetTextColor(tcell.ColorBlack).
+		SetBackgroundColor(tcell.NewHexColor((0x98<<16)|(0xDC<<8)|0xF5)))
+	// SetBackgroundColor(tcell.NewHexColor((0x27 << 16) | (0xBE << 8) | 0xF5))
+
 	tui.mainPage.tab2.SetCell(1, 0, tview.NewTableCell("PC").SetAlign(tview.AlignCenter))
-	tui.mainPage.tab2.SetCell(1, 1, tview.NewTableCell(fmt.Sprintf("%016b", tui.gameboy.Reg.ReadPC())).SetAlign(tview.AlignCenter).SetExpansion(1))
+	tui.mainPage.tab2.SetCell(1, 1, tview.NewTableCell(fmt.Sprintf("%016b    %#04x", pc, pc)).SetAlign(tview.AlignCenter).SetExpansion(1))
 }
 
 // newTui returns a new tview application for the terminal UI
