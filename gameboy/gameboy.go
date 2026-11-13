@@ -35,6 +35,226 @@ func (gb *GameBoy) ExecuteInstruction() {
 
 	opcode := gb.Reg.IR
 	switch opcode {
+	case 0x00:
+		return
+	case 0x01:
+		return
+	case 0x02:
+		return
+	case 0x03:
+		return
+	case 0x04:
+		return
+	case 0x05:
+		return
+	case 0x06: // LD B, n8
+		// M2
+		Z := gb.ReadByAddress(gb.Reg.PC)
+		gb.Reg.IncreasePC()
+
+		// M3/M1
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
+		gb.Reg.WriteB(Z)
+
+	case 0x07:
+		return
+	case 0x08:
+		return
+	case 0x09:
+		return
+	case 0x0A:
+		return
+	case 0x0B:
+		return
+	case 0x0C:
+		return
+	case 0x0D:
+		return
+	case 0x0E: // LD C, n8
+		// M2
+		Z := gb.ReadByAddress(gb.Reg.PC)
+		gb.Reg.IncreasePC()
+
+		// M3/M1
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
+		gb.Reg.WriteC(Z)
+
+	case 0x0F:
+		return
+	case 0x10:
+		return
+	case 0x11:
+		return
+	case 0x12:
+		return
+	case 0x13:
+		return
+	case 0x14:
+		return
+	case 0x15:
+		return
+	case 0x16: // LD D, n8
+		// M2
+		Z := gb.ReadByAddress(gb.Reg.PC)
+		gb.Reg.IncreasePC()
+
+		// M3/M1
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
+		gb.Reg.WriteD(Z)
+
+	case 0x17:
+		return
+	case 0x18:
+		return
+	case 0x19:
+		return
+	case 0x1A:
+		return
+	case 0x1B:
+		return
+	case 0x1C:
+		return
+	case 0x1D:
+		return
+	case 0x1E: // LD E, n8
+		// M2
+		Z := gb.ReadByAddress(gb.Reg.PC)
+		gb.Reg.IncreasePC()
+
+		// M3/M1
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
+		gb.Reg.WriteE(Z)
+
+	case 0x1F:
+		return
+	case 0x20:
+		return
+	case 0x21:
+		return
+	case 0x22:
+		return
+	case 0x23:
+		return
+	case 0x24:
+		return
+	case 0x25:
+		return
+	case 0x26: // LD H, n8
+		// M2
+		Z := gb.ReadByAddress(gb.Reg.PC)
+		gb.Reg.IncreasePC()
+
+		// M3/M1
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
+		gb.Reg.WriteH(Z)
+
+	case 0x27:
+		return
+	case 0x28:
+		return
+	case 0x29:
+		return
+	case 0x2A:
+		return
+	case 0x2B:
+		return
+	case 0x2C:
+		return
+	case 0x2D:
+		return
+	case 0x2E: // LD L, n8
+		// M2
+		Z := gb.ReadByAddress(gb.Reg.PC)
+		gb.Reg.IncreasePC()
+
+		// M3/M1
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
+		gb.Reg.WriteL(Z)
+
+	case 0x2F:
+		return
+	case 0x30:
+		return
+	case 0x31:
+		return
+	case 0x32:
+		return
+	case 0x33:
+		return
+	case 0x34:
+		return
+	case 0x35:
+		return
+	case 0x36: // LD [HL], n8
+		// M2
+		Z := gb.ReadByAddress(gb.Reg.PC)
+		gb.Reg.IncreasePC()
+
+		// M3
+		gb.WriteOnAddress(Z, gb.Reg.ReadHL())
+
+		// M4/M1
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
+		gb.Reg.WriteH(Z)
+
+	case 0x37:
+		return
+	case 0x38:
+		return
+	case 0x39:
+		return
+	case 0x3A:
+		return
+	case 0x3B:
+		return
+	case 0x3C:
+		return
+	case 0x3D:
+		return
+	case 0x3E: // LD A, n8
+		// M2
+		Z := gb.ReadByAddress(gb.Reg.PC)
+		gb.Reg.IncreasePC()
+
+		// M3/M1
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
+		gb.Reg.WriteA(Z)
+
+	case 0x3F:
+		return
+
 	case 0x40: // LD B, B
 		// M2/M1
 		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
