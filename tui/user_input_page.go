@@ -201,6 +201,7 @@ func createSetStackPointerAtMemoryAddress(tui *Tui) SetStackPointerAtMemoryAddre
 
 			tui.gameboy.Reg.WriteSP(address)
 			tui.UpdateRegisterTables()
+			tui.UpdateRAMView(true)
 		}
 	})
 

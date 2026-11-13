@@ -72,18 +72,6 @@ func createMainPage(tui *Tui) MainPage {
 			return event
 		}
 
-		// if state.executingInstructions {
-		// 	switch r := event.Rune(); r {
-		// 	case 'n':
-		// 		readingBox.positionNumber = readingBox.positionNumber + 1
-		// 		if readingBox.positionNumber == len(readingBox.instructions)+1 {
-		// 			state.executingInstructions = false
-		// 		}
-		// 		readingBox.DisplayInstructions(state)
-		// 		return event
-		// 	}
-		// }
-
 		switch r := event.Rune(); r {
 		case 'q':
 			// if !instrField.HasFocus() {
@@ -96,10 +84,6 @@ func createMainPage(tui *Tui) MainPage {
 			tui.state.menuOpen = true
 			tui.app.SetFocus(tui.menuPage.page)
 			return nil
-			// app.SetFocus(menuTextBox)
-
-			// app.SetFocus(menu_list)
-
 			// case 's':
 			// 	ramView.ScrollToHighlight()
 			// case 'r':
@@ -112,20 +96,3 @@ func createMainPage(tui *Tui) MainPage {
 	})
 	return mainPage
 }
-
-// func (p MainPage) GetPrimitiveByName(name PrimitiveName) tview.Primitive {
-// 	switch name {
-// 	case InfoBox:
-// 		return p.GetItem(0)
-// 	}
-// }
-
-// type ReadingBox struct {
-// 	app                *tview.Application
-// 	text               *tview.TextView
-// 	instructions       []string
-// 	numLines           int
-// 	positionNumber     int
-// 	loadedInstructions bool
-// }
-//
