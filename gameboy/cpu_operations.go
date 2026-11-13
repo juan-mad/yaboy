@@ -127,6 +127,14 @@ func (r *CPURegisters) WriteSP(bb uint16) {
 	r.SP = bb
 }
 
+func (r *CPURegisters) IncreaseSP() {
+	r.SP = r.SP + 1
+}
+
+func (r *CPURegisters) DecreaseSP() {
+	r.SP = r.SP - 1
+}
+
 // ReadZeroFlag returns whether the 7th bit of register F is set.
 // This bit contains the Zero flag, and is set iff the result of an operation is zero.
 // Used by conditional jumps.
