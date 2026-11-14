@@ -53,6 +53,79 @@ func AddUnsigned8Carry(a, b uint8, carry bool) (result uint8, halfCarry, carryOu
 	return uint8(sum), lowNibbleSum > 0x0F, sum > 0xFF
 }
 
+// RotateLeft shifts the input value 1 bit to the left, and puts the carry flag
+// into the bit 0 position
+func RotateLeft(a uint8, carry bool) (result uint8, top_bit bool) {
+	top_bit = (a >> 7) == 0b1
+	result = a << 1
+	if carry {
+		result = result | 0b1
+	}
+
+	return result, top_bit
+}
+
+// RotateRight shifts the input value 1 bit to the right, and puts the carry flag
+// into the bit 0 position
+func RotateRight(a uint8, carry bool) (result uint8, bottom_bit bool) {
+	bottom_bit = (a & 0b1) == 0b1
+	result = a >> 1
+	if carry {
+		result = result | (0b1 << 7)
+	}
+
+	return result, bottom_bit
+}
+
+// RotateLeftCircular shifts the input value 1 bit to the left, and puts the original
+// 7th bit in the place of the new 0th bit
+func RotateLeftCircular(a uint8) (result uint8, top_bit bool) {
+	top_bit = (a >> 7) == 0b1
+	result = (a << 1) | (a >> 7)
+
+	return result, top_bit
+}
+
+// RotateRightCircular shifts the input value 1 bit to the right, and puts the original
+// 0th bit in the place of the new 7th bit
+func RotateRightCircular(a uint8) (result uint8, bottom_bit bool) {
+	bottom_bit = (a & 0b1) == 0b1
+	result = (a >> 1) | (a << 7)
+
+	return result, bottom_bit
+}
+
+// ShiftLeftArithmetic shifts the input value 1 bit to the left. The 7th bit becomes
+// the carry flag; the 0th bit is always 0.
+func ShiftLeftArithmetic(a uint8) (result uint8, carry bool) {
+	carry = (a >> 7) == 0b1
+	result = a << 1
+
+	return result, carry
+}
+
+// ShiftRightArithmetic shifts the input value 1 bit to the right. The 0th bit becomes
+// the carry flag; the 7th bit remains unchanged.
+func ShiftRightArithmetic(a uint8) (result uint8, carry bool) {
+	carry = (a & 0b1) == 0b1
+	result = (a >> 1) | (a & 0b10000000)
+
+	return result, carry
+}
+
+// ShiftRightLogically shifts the input value 1 bit to the right. The 0th bit becomes
+// the carry flag; the 7th bit is always 0.
+func ShiftRightLogically(a uint8) (result uint8, carry bool) {
+	carry = (a & 0b1) == 0b1
+	result = (a >> 1)
+
+	return result, carry
+}
+
+func SwapNibbles(a uint8) uint8 {
+	return (a >> 4) | ((a & 0xF) << 4)
+}
+
 func (gb *GameBoy) ExecuteInstruction() {
 	if !gb.Started {
 		// Only fetch cycle
@@ -146,8 +219,22 @@ func (gb *GameBoy) ExecuteInstruction() {
 
 		gb.Reg.WriteB(Z)
 
-	case 0x07:
-		return
+	case 0x07: // RLCA
+		// M2/M1
+		result, carry := RotateLeftCircular(gb.Reg.ReadA())
+
+		gb.Reg.SetZeroFlag(false)
+		gb.Reg.SetSubstractionFlag(false)
+		gb.Reg.SetHalfCarryFlag(false)
+		gb.Reg.SetCarryFlag(carry)
+
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
+		gb.Reg.WriteA(result)
+
 	case 0x08: // LD (nn), SP
 		// M2
 		Z := gb.ReadByAddress(gb.Reg.ReadPC())
@@ -255,8 +342,22 @@ func (gb *GameBoy) ExecuteInstruction() {
 
 		gb.Reg.WriteC(Z)
 
-	case 0x0F:
-		return
+	case 0x0F: // RRCA
+		// M2/M1
+		result, carry := RotateRightCircular(gb.Reg.ReadA())
+
+		gb.Reg.SetZeroFlag(false)
+		gb.Reg.SetSubstractionFlag(false)
+		gb.Reg.SetHalfCarryFlag(false)
+		gb.Reg.SetCarryFlag(carry)
+
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
+		gb.Reg.WriteA(result)
+
 	case 0x10:
 		return
 	case 0x11: // LD DE, n16
@@ -335,8 +436,22 @@ func (gb *GameBoy) ExecuteInstruction() {
 
 		gb.Reg.WriteD(Z)
 
-	case 0x17:
-		return
+	case 0x17: // RLA
+		// M2/M1
+		result, carry := RotateLeft(gb.Reg.ReadA(), gb.Reg.ReadCarryFlag())
+
+		gb.Reg.SetZeroFlag(false)
+		gb.Reg.SetSubstractionFlag(false)
+		gb.Reg.SetHalfCarryFlag(false)
+		gb.Reg.SetCarryFlag(carry)
+
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
+		gb.Reg.WriteA(result)
+
 	case 0x18:
 		return
 	case 0x19: // ADD HL, DE
@@ -422,8 +537,22 @@ func (gb *GameBoy) ExecuteInstruction() {
 
 		gb.Reg.WriteE(Z)
 
-	case 0x1F:
-		return
+	case 0x1F: // RRA
+		// M2/M1
+		result, carry := RotateRight(gb.Reg.ReadA(), gb.Reg.ReadCarryFlag())
+
+		gb.Reg.SetZeroFlag(false)
+		gb.Reg.SetSubstractionFlag(false)
+		gb.Reg.SetHalfCarryFlag(false)
+		gb.Reg.SetCarryFlag(carry)
+
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
+		gb.Reg.WriteA(result)
+
 	case 0x20:
 		return
 	case 0x21: // LD HL, n16
@@ -1337,7 +1466,7 @@ func (gb *GameBoy) ExecuteInstruction() {
 		gb.Reg.IE = interrupt
 		gb.Reg.IncreasePC()
 
-	case 0x76: // HALT
+	case 0x76: // HALT TODO
 		// TO BE IMPLEMENTED
 		break
 
@@ -2422,7 +2551,1261 @@ func (gb *GameBoy) ExecuteInstruction() {
 	case 0xC8:
 	case 0xC9:
 	case 0xCA:
-	case 0xCB:
+	case 0xCB: // PREFIX
+		// M2
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
+		switch opcode {
+		case 0x00: // RLC B
+			// M3/M1
+			result, carry := RotateLeftCircular(gb.Reg.ReadB())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteB(result)
+
+		case 0x01: // RLC C
+			// M3/M1
+			result, carry := RotateLeftCircular(gb.Reg.ReadC())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteC(result)
+
+		case 0x02: // RLC D
+			// M3/M1
+			result, carry := RotateLeftCircular(gb.Reg.ReadD())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteD(result)
+
+		case 0x03: // RLC E
+			// M3/M1
+			result, carry := RotateLeftCircular(gb.Reg.ReadE())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteE(result)
+
+		case 0x04: // RLC H
+			// M3/M1
+			result, carry := RotateLeftCircular(gb.Reg.ReadH())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteH(result)
+
+		case 0x05: // RLC L
+			// M3/M1
+			result, carry := RotateLeftCircular(gb.Reg.ReadL())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteL(result)
+
+		case 0x06: // RLC [HL]
+			// M3
+			Z := gb.ReadByAddress(gb.Reg.ReadHL())
+
+			// M4
+			result, carry := RotateLeftCircular(Z)
+
+			// M5/M1
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.WriteOnAddress(result, gb.Reg.ReadHL())
+
+		case 0x07: // RLC A
+			// M3/M1
+			result, carry := RotateLeftCircular(gb.Reg.ReadA())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteA(result)
+
+		case 0x08: // RRC B
+			// M3/M1
+			result, carry := RotateRightCircular(gb.Reg.ReadB())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteB(result)
+
+		case 0x09: // RRC C
+			// M3/M1
+			result, carry := RotateRightCircular(gb.Reg.ReadC())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteC(result)
+
+		case 0x0A: // RRC D
+			// M3/M1
+			result, carry := RotateRightCircular(gb.Reg.ReadD())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteD(result)
+
+		case 0x0B: // RRC E
+			// M3/M1
+			result, carry := RotateRightCircular(gb.Reg.ReadE())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteE(result)
+
+		case 0x0C: // RRC H
+			// M3/M1
+			result, carry := RotateRightCircular(gb.Reg.ReadH())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteH(result)
+
+		case 0x0D: // RRC L
+			// M3/M1
+			result, carry := RotateRightCircular(gb.Reg.ReadL())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteL(result)
+
+		case 0x0E: // RRC [HL]
+			// M3
+			Z := gb.ReadByAddress(gb.Reg.ReadHL())
+
+			// M4
+			result, carry := RotateRightCircular(Z)
+
+			// M5/M1
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.WriteOnAddress(result, gb.Reg.ReadHL())
+
+		case 0x0F: // RRC A
+			// M3/M1
+			result, carry := RotateRightCircular(gb.Reg.ReadA())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteA(result)
+
+		case 0x10: // RL B
+			// M3/M1
+			result, carry := RotateLeft(gb.Reg.ReadB(), gb.Reg.ReadCarryFlag())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteB(result)
+
+		case 0x11: // RL C
+			// M3/M1
+			result, carry := RotateLeft(gb.Reg.ReadC(), gb.Reg.ReadCarryFlag())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteC(result)
+
+		case 0x12: // RL D
+			// M3/M1
+			result, carry := RotateLeft(gb.Reg.ReadD(), gb.Reg.ReadCarryFlag())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteD(result)
+
+		case 0x13: // RL E
+			// M3/M1
+			result, carry := RotateLeft(gb.Reg.ReadE(), gb.Reg.ReadCarryFlag())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteE(result)
+
+		case 0x14: // RL H
+			// M3/M1
+			result, carry := RotateLeft(gb.Reg.ReadH(), gb.Reg.ReadCarryFlag())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteH(result)
+
+		case 0x15: // RL L
+			// M3/M1
+			result, carry := RotateLeft(gb.Reg.ReadL(), gb.Reg.ReadCarryFlag())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteL(result)
+
+		case 0x16: // RL [HL]
+			// M3
+			Z := gb.ReadByAddress(gb.Reg.ReadHL())
+
+			// M4
+			result, carry := RotateLeft(Z, gb.Reg.ReadCarryFlag())
+
+			// M5/M1
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.WriteOnAddress(result, gb.Reg.ReadHL())
+
+		case 0x17: // RL A
+			// M3/M1
+			result, carry := RotateLeft(gb.Reg.ReadA(), gb.Reg.ReadCarryFlag())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteA(result)
+
+		case 0x18: // RR B
+			// M3/M1
+			result, carry := RotateRight(gb.Reg.ReadB(), gb.Reg.ReadCarryFlag())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteB(result)
+
+		case 0x19: // RR C
+			// M3/M1
+			result, carry := RotateRight(gb.Reg.ReadC(), gb.Reg.ReadCarryFlag())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteC(result)
+
+		case 0x1A: // RR D
+			// M3/M1
+			result, carry := RotateRight(gb.Reg.ReadD(), gb.Reg.ReadCarryFlag())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteD(result)
+
+		case 0x1B: // RR E
+			// M3/M1
+			result, carry := RotateRight(gb.Reg.ReadE(), gb.Reg.ReadCarryFlag())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteE(result)
+
+		case 0x1C: // RR H
+			// M3/M1
+			result, carry := RotateRight(gb.Reg.ReadH(), gb.Reg.ReadCarryFlag())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteH(result)
+
+		case 0x1D: // RR L
+			// M3/M1
+			result, carry := RotateRight(gb.Reg.ReadL(), gb.Reg.ReadCarryFlag())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteL(result)
+
+		case 0x1E: // RR [HL]
+			// M3
+			Z := gb.ReadByAddress(gb.Reg.ReadHL())
+
+			// M4
+			result, carry := RotateRight(Z, gb.Reg.ReadCarryFlag())
+
+			// M5/M1
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.WriteOnAddress(result, gb.Reg.ReadHL())
+
+		case 0x1F: // RR A
+			// M3/M1
+			result, carry := RotateRight(gb.Reg.ReadA(), gb.Reg.ReadCarryFlag())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteA(result)
+
+		case 0x20: // SLA B
+			// M3/M1
+			result, carry := ShiftLeftArithmetic(gb.Reg.ReadB())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteB(result)
+
+		case 0x21: // SLA C
+			// M3/M1
+			result, carry := ShiftLeftArithmetic(gb.Reg.ReadC())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteC(result)
+
+		case 0x22: // SLA D
+			// M3/M1
+			result, carry := ShiftLeftArithmetic(gb.Reg.ReadD())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteD(result)
+
+		case 0x23: // SLA E
+			// M3/M1
+			result, carry := ShiftLeftArithmetic(gb.Reg.ReadE())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteE(result)
+
+		case 0x24: // SLA H
+			// M3/M1
+			result, carry := ShiftLeftArithmetic(gb.Reg.ReadH())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteH(result)
+
+		case 0x25: // SLA L
+			// M3/M1
+			result, carry := ShiftLeftArithmetic(gb.Reg.ReadL())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteL(result)
+
+		case 0x26: // SLA [HL]
+			// M3
+			Z := gb.ReadByAddress(gb.Reg.ReadHL())
+
+			// M4
+			result, carry := ShiftLeftArithmetic(Z)
+			// M5/M1
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.WriteOnAddress(result, gb.Reg.ReadHL())
+
+		case 0x27: // SLA A
+			// M3/M1
+			result, carry := ShiftLeftArithmetic(gb.Reg.ReadA())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteA(result)
+
+		case 0x28: // SRA B
+			// M3/M1
+			result, carry := ShiftRightArithmetic(gb.Reg.ReadB())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteB(result)
+
+		case 0x29: // SRA C
+			// M3/M1
+			result, carry := ShiftRightArithmetic(gb.Reg.ReadC())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteC(result)
+
+		case 0x2A: // SRA D
+			// M3/M1
+			result, carry := ShiftRightArithmetic(gb.Reg.ReadD())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteD(result)
+
+		case 0x2B: // SRA E
+			// M3/M1
+			result, carry := ShiftRightArithmetic(gb.Reg.ReadE())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteE(result)
+
+		case 0x2C: // SRA H
+			// M3/M1
+			result, carry := ShiftRightArithmetic(gb.Reg.ReadH())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteH(result)
+
+		case 0x2D: // SRA L
+			// M3/M1
+			result, carry := ShiftRightArithmetic(gb.Reg.ReadL())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteL(result)
+
+		case 0x2E: // SRA [HL]
+			// M3
+			Z := gb.ReadByAddress(gb.Reg.ReadHL())
+
+			// M4
+			result, carry := ShiftRightArithmetic(Z)
+			// M5/M1
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.WriteOnAddress(result, gb.Reg.ReadHL())
+
+		case 0x2F: // SRA A
+			// M3/M1
+			result, carry := ShiftRightArithmetic(gb.Reg.ReadA())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteA(result)
+
+		case 0x30: // SWAP B
+			// M3/M1
+			result := SwapNibbles(gb.Reg.ReadB())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(false)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteB(result)
+
+		case 0x31: // SWAP C
+			// M3/M1
+			result := SwapNibbles(gb.Reg.ReadC())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(false)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteC(result)
+
+		case 0x32: // SWAP D
+			// M3/M1
+			result := SwapNibbles(gb.Reg.ReadD())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(false)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteD(result)
+
+		case 0x33: // SWAP E
+			// M3/M1
+			result := SwapNibbles(gb.Reg.ReadE())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(false)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteE(result)
+
+		case 0x34: // SWAP H
+			// M3/M1
+			result := SwapNibbles(gb.Reg.ReadH())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(false)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteH(result)
+
+		case 0x35: // SWAP L
+			// M3/M1
+			result := SwapNibbles(gb.Reg.ReadL())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(false)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteL(result)
+
+		case 0x36: // SWAP [HL]
+			// M3
+			Z := gb.ReadByAddress(gb.Reg.ReadHL())
+
+			// M4
+			result := SwapNibbles(Z)
+			// M5/M1
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(false)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.WriteOnAddress(result, gb.Reg.ReadHL())
+
+		case 0x37: // SWAP A
+			// M3/M1
+			result := SwapNibbles(gb.Reg.ReadA())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(false)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteA(result)
+
+		case 0x38: // SRL B
+			// M3/M1
+			result, carry := ShiftRightLogically(gb.Reg.ReadB())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteB(result)
+
+		case 0x39: // SRL C
+			// M3/M1
+			result, carry := ShiftRightLogically(gb.Reg.ReadC())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteC(result)
+
+		case 0x3A: // SRL D
+			// M3/M1
+			result, carry := ShiftRightLogically(gb.Reg.ReadD())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteD(result)
+
+		case 0x3B: // SRL E
+			// M3/M1
+			result, carry := ShiftRightLogically(gb.Reg.ReadE())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteE(result)
+
+		case 0x3C: // SRL H
+			// M3/M1
+			result, carry := ShiftRightLogically(gb.Reg.ReadH())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteH(result)
+
+		case 0x3D: // SRL L
+			// M3/M1
+			result, carry := ShiftRightLogically(gb.Reg.ReadL())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteL(result)
+
+		case 0x3E: // SRL [HL]
+			// M3
+			Z := gb.ReadByAddress(gb.Reg.ReadHL())
+
+			// M4
+			result, carry := ShiftRightLogically(Z)
+			// M5/M1
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.WriteOnAddress(result, gb.Reg.ReadHL())
+
+		case 0x3F: // SRL A
+			// M3/M1
+			result, carry := ShiftRightLogically(gb.Reg.ReadA())
+
+			gb.Reg.SetZeroFlag(result == 0)
+			gb.Reg.SetSubstractionFlag(false)
+			gb.Reg.SetHalfCarryFlag(false)
+			gb.Reg.SetCarryFlag(carry)
+
+			opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+			gb.Reg.IR = opcode
+			gb.Reg.IE = interrupt
+			gb.Reg.IncreasePC()
+
+			gb.Reg.WriteA(result)
+
+		case 0x40: // BIT 0, B
+		case 0x41: // BIT 0, C
+		case 0x42: // BIT 0, D
+		case 0x43: // BIT 0, E
+		case 0x44: // BIT 0, H
+		case 0x45: // BIT 0, L
+		case 0x46: // BIT 0, [HL]
+		case 0x47: // BIT 0, A
+		case 0x48: // BIT 1, B
+		case 0x49: // BIT 1, C
+		case 0x4A: // BIT 1, D
+		case 0x4B: // BIT 1, E
+		case 0x4C: // BIT 1, H
+		case 0x4D: // BIT 1, L
+		case 0x4E: // BIT 1, [HL]
+		case 0x4F: // BIT 1, A
+		case 0x50: // BIT 2, B
+		case 0x51: // BIT 2, C
+		case 0x52: // BIT 2, D
+		case 0x53: // BIT 2, E
+		case 0x54: // BIT 2, H
+		case 0x55: // BIT 2, L
+		case 0x56: // BIT 2, [HL]
+		case 0x57: // BIT 2, A
+		case 0x58: // BIT 3, B
+		case 0x59: // BIT 3, C
+		case 0x5A: // BIT 3, D
+		case 0x5B: // BIT 3, E
+		case 0x5C: // BIT 3, H
+		case 0x5D: // BIT 3, L
+		case 0x5E: // BIT 3, [HL]
+		case 0x5F: // BIT 3, A
+		case 0x60: // BIT 4, B
+		case 0x61: // BIT 4, C
+		case 0x62: // BIT 4, D
+		case 0x63: // BIT 4, E
+		case 0x64: // BIT 4, H
+		case 0x65: // BIT 4, L
+		case 0x66: // BIT 4, [HL]
+		case 0x67: // BIT 4, A
+		case 0x68: // BIT 5, B
+		case 0x69: // BIT 5, C
+		case 0x6A: // BIT 5, D
+		case 0x6B: // BIT 5, E
+		case 0x6C: // BIT 5, H
+		case 0x6D: // BIT 5, L
+		case 0x6E: // BIT 5, [HL]
+		case 0x6F: // BIT 5, A
+		case 0x70: // BIT 6, B
+		case 0x71: // BIT 6, C
+		case 0x72: // BIT 6, D
+		case 0x73: // BIT 6, E
+		case 0x74: // BIT 6, H
+		case 0x75: // BIT 6, L
+		case 0x76: // BIT 6, [HL]
+		case 0x77: // BIT 6, A
+		case 0x78: // BIT 7, B
+		case 0x79: // BIT 7, C
+		case 0x7A: // BIT 7, D
+		case 0x7B: // BIT 7, E
+		case 0x7C: // BIT 7, H
+		case 0x7D: // BIT 7, L
+		case 0x7E: // BIT 7, [HL]
+		case 0x7F: // BIT 7, A
+		case 0x80: // RES 0, B
+		case 0x81: // RES 0, C
+		case 0x82: // RES 0, D
+		case 0x83: // RES 0, E
+		case 0x84: // RES 0, H
+		case 0x85: // RES 0, L
+		case 0x86: // RES 0, [HL]
+		case 0x87: // RES 0, A
+		case 0x88: // RES 1, B
+		case 0x89: // RES 1, C
+		case 0x8A: // RES 1, D
+		case 0x8B: // RES 1, E
+		case 0x8C: // RES 1, H
+		case 0x8D: // RES 1, L
+		case 0x8E: // RES 1, [HL]
+		case 0x8F: // RES 1, A
+		case 0x90: // RES 2, B
+		case 0x91: // RES 2, C
+		case 0x92: // RES 2, D
+		case 0x93: // RES 2, E
+		case 0x94: // RES 2, H
+		case 0x95: // RES 2, L
+		case 0x96: // RES 2, [HL]
+		case 0x97: // RES 2, A
+		case 0x98: // RES 3, B
+		case 0x99: // RES 3, C
+		case 0x9A: // RES 3, D
+		case 0x9B: // RES 3, E
+		case 0x9C: // RES 3, H
+		case 0x9D: // RES 3, L
+		case 0x9E: // RES 3, [HL]
+		case 0x9F: // RES 3, A
+		case 0xA0: // RES 4, B
+		case 0xA1: // RES 4, C
+		case 0xA2: // RES 4, D
+		case 0xA3: // RES 4, E
+		case 0xA4: // RES 4, H
+		case 0xA5: // RES 4, L
+		case 0xA6: // RES 4, [HL]
+		case 0xA7: // RES 4, A
+		case 0xA8: // RES 5, B
+		case 0xA9: // RES 5, C
+		case 0xAA: // RES 5, D
+		case 0xAB: // RES 5, E
+		case 0xAC: // RES 5, H
+		case 0xAD: // RES 5, L
+		case 0xAE: // RES 5, [HL]
+		case 0xAF: // RES 5, A
+		case 0xB0: // RES 6, B
+		case 0xB1: // RES 6, C
+		case 0xB2: // RES 6, D
+		case 0xB3: // RES 6, E
+		case 0xB4: // RES 6, H
+		case 0xB5: // RES 6, L
+		case 0xB6: // RES 6, [HL]
+		case 0xB7: // RES 6, A
+		case 0xB8: // RES 7, B
+		case 0xB9: // RES 7, C
+		case 0xBA: // RES 7, D
+		case 0xBB: // RES 7, E
+		case 0xBC: // RES 7, H
+		case 0xBD: // RES 7, L
+		case 0xBE: // RES 7, [HL]
+		case 0xBF: // RES 7, A
+		case 0xC0: // SET 0, B
+		case 0xC1: // SET 0, C
+		case 0xC2: // SET 0, D
+		case 0xC3: // SET 0, E
+		case 0xC4: // SET 0, H
+		case 0xC5: // SET 0, L
+		case 0xC6: // SET 0, [HL]
+		case 0xC7: // SET 0, A
+		case 0xC8: // SET 1, B
+		case 0xC9: // SET 1, C
+		case 0xCA: // SET 1, D
+		case 0xCB: // SET 1, E
+		case 0xCC: // SET 1, H
+		case 0xCD: // SET 1, L
+		case 0xCE: // SET 1, [HL]
+		case 0xCF: // SET 1, A
+		case 0xD0: // SET 2, B
+		case 0xD1: // SET 2, C
+		case 0xD2: // SET 2, D
+		case 0xD3: // SET 2, E
+		case 0xD4: // SET 2, H
+		case 0xD5: // SET 2, L
+		case 0xD6: // SET 2, [HL]
+		case 0xD7: // SET 2, A
+		case 0xD8: // SET 3, B
+		case 0xD9: // SET 3, C
+		case 0xDA: // SET 3, D
+		case 0xDB: // SET 3, E
+		case 0xDC: // SET 3, H
+		case 0xDD: // SET 3, L
+		case 0xDE: // SET 3, [HL]
+		case 0xDF: // SET 3, A
+		case 0xE0: // SET 4, B
+		case 0xE1: // SET 4, C
+		case 0xE2: // SET 4, D
+		case 0xE3: // SET 4, E
+		case 0xE4: // SET 4, H
+		case 0xE5: // SET 4, L
+		case 0xE6: // SET 4, [HL]
+		case 0xE7: // SET 4, A
+		case 0xE8: // SET 5, B
+		case 0xE9: // SET 5, C
+		case 0xEA: // SET 5, D
+		case 0xEB: // SET 5, E
+		case 0xEC: // SET 5, H
+		case 0xED: // SET 5, L
+		case 0xEE: // SET 5, [HL]
+		case 0xEF: // SET 5, A
+		case 0xF0: // SET 6, B
+		case 0xF1: // SET 6, C
+		case 0xF2: // SET 6, D
+		case 0xF3: // SET 6, E
+		case 0xF4: // SET 6, H
+		case 0xF5: // SET 6, L
+		case 0xF6: // SET 6, [HL]
+		case 0xF7: // SET 6, A
+		case 0xF8: // SET 7, B
+		case 0xF9: // SET 7, C
+		case 0xFA: // SET 7, D
+		case 0xFB: // SET 7, E
+		case 0xFC: // SET 7, H
+		case 0xFD: // SET 7, L
+		case 0xFE: // SET 7, [HL]
+		case 0xFF: // SET 7, A
+
+		}
+
 	case 0xCC:
 	case 0xCD:
 	case 0xCE: // ADC A, n8
@@ -2609,9 +3992,9 @@ func (gb *GameBoy) ExecuteInstruction() {
 
 		// M3
 		sp_value := gb.Reg.ReadSP()
-		result, halfCarry, carry := AddUnsigned8(uint8(sp_value & 0xFF), Z)
+		result, halfCarry, carry := AddUnsigned8(uint8(sp_value&0xFF), Z)
 		Z = result
-		
+
 		gb.Reg.SetZeroFlag(false)
 		gb.Reg.SetSubstractionFlag(false)
 		gb.Reg.SetHalfCarryFlag(halfCarry)
@@ -2625,7 +4008,7 @@ func (gb *GameBoy) ExecuteInstruction() {
 		if gb.Reg.ReadCarryFlag() {
 			result = result + 0b1
 		}
-		
+
 		// M5/M1
 		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
 		gb.Reg.IR = opcode
@@ -2633,7 +4016,7 @@ func (gb *GameBoy) ExecuteInstruction() {
 		gb.Reg.IncreasePC()
 
 		gb.Reg.WriteSP((uint16(result) << 8) | uint16(Z))
-		
+
 	case 0xE9:
 	case 0xEA: // LD (nn), A
 		// M2
