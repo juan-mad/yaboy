@@ -514,8 +514,17 @@ func (gb *GameBoy) ExecuteInstruction() {
 
 		gb.Reg.WriteL(Z)
 
-	case 0x2F:
-		return
+	case 0x2F: // CPL
+		// M2/M1
+		gb.Reg.WriteA(^gb.Reg.ReadA())
+		gb.Reg.SetSubstractionFlag(true)
+		gb.Reg.SetHalfCarryFlag(true)
+
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
 	case 0x30:
 		return
 	case 0x31: // LD SP, n16
