@@ -97,8 +97,16 @@ func (gb *GameBoy) ExecuteInstruction() {
 		gb.Reg.IE = interrupt
 		gb.Reg.IncreasePC()
 
-	case 0x03:
-		return
+	case 0x03: // INC BC
+		// M2
+		gb.Reg.WriteBC(gb.Reg.ReadBC() + 1)
+
+		// M3/M1
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
 	case 0x04: // INC B
 		// M2/M1
 		result, halfCarry, _ := AddUnsigned8(gb.Reg.ReadB(), 1)
@@ -164,8 +172,28 @@ func (gb *GameBoy) ExecuteInstruction() {
 		gb.Reg.IE = interrupt
 		gb.Reg.IncreasePC()
 
-	case 0x09:
-		return
+	case 0x09: // ADD HL, BC
+		// M2
+		result, halfCarry, carry := AddUnsigned8(gb.Reg.ReadL(), gb.Reg.ReadC())
+		gb.Reg.WriteL(result)
+
+		gb.Reg.SetSubstractionFlag(false)
+		gb.Reg.SetHalfCarryFlag(halfCarry)
+		gb.Reg.SetCarryFlag(carry)
+
+		// M3/M1
+		result, halfCarry, carry = AddUnsigned8Carry(gb.Reg.ReadH(), gb.Reg.ReadB(), carry)
+		gb.Reg.WriteH(result)
+
+		gb.Reg.SetSubstractionFlag(false)
+		gb.Reg.SetHalfCarryFlag(halfCarry)
+		gb.Reg.SetCarryFlag(carry)
+
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
 	case 0x0A: // LD A, [BC]
 		// M2
 		Z := gb.ReadByAddress(gb.Reg.ReadBC())
@@ -178,8 +206,16 @@ func (gb *GameBoy) ExecuteInstruction() {
 
 		gb.Reg.WriteA(Z)
 
-	case 0x0B:
-		return
+	case 0x0B: // DEC BC
+		// M2
+		gb.Reg.WriteBC(gb.Reg.ReadBC() + 1)
+
+		// M3/M1
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
 	case 0x0C: // INC C
 		// M2/M1
 		result, halfCarry, _ := AddUnsigned8(gb.Reg.ReadC(), 1)
@@ -250,8 +286,16 @@ func (gb *GameBoy) ExecuteInstruction() {
 		gb.Reg.IE = interrupt
 		gb.Reg.IncreasePC()
 
-	case 0x13:
-		return
+	case 0x13: // INC DE
+		// M2
+		gb.Reg.WriteDE(gb.Reg.ReadDE() + 1)
+
+		// M3/M1
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
 	case 0x14: // INC D
 		// M2/M1
 		result, halfCarry, _ := AddUnsigned8(gb.Reg.ReadD(), 1)
@@ -295,8 +339,28 @@ func (gb *GameBoy) ExecuteInstruction() {
 		return
 	case 0x18:
 		return
-	case 0x19:
-		return
+	case 0x19: // ADD HL, DE
+		// M2
+		result, halfCarry, carry := AddUnsigned8(gb.Reg.ReadL(), gb.Reg.ReadE())
+		gb.Reg.WriteL(result)
+
+		gb.Reg.SetSubstractionFlag(false)
+		gb.Reg.SetHalfCarryFlag(halfCarry)
+		gb.Reg.SetCarryFlag(carry)
+
+		// M3/M1
+		result, halfCarry, carry = AddUnsigned8Carry(gb.Reg.ReadH(), gb.Reg.ReadD(), carry)
+		gb.Reg.WriteH(result)
+
+		gb.Reg.SetSubstractionFlag(false)
+		gb.Reg.SetHalfCarryFlag(halfCarry)
+		gb.Reg.SetCarryFlag(carry)
+
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
 	case 0x1A: // LD A, [DE]
 		// M2
 		Z := gb.ReadByAddress(gb.Reg.ReadDE())
@@ -309,8 +373,16 @@ func (gb *GameBoy) ExecuteInstruction() {
 
 		gb.Reg.WriteA(Z)
 
-	case 0x1B:
-		return
+	case 0x1B: // DEC DE
+		// M2
+		gb.Reg.WriteDE(gb.Reg.ReadDE() + 1)
+
+		// M3/M1
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
 	case 0x1C: // INC E
 		// M2/M1
 		result, halfCarry, _ := AddUnsigned8(gb.Reg.ReadE(), 1)
@@ -382,8 +454,16 @@ func (gb *GameBoy) ExecuteInstruction() {
 		gb.Reg.IE = interrupt
 		gb.Reg.IncreasePC()
 
-	case 0x23:
-		return
+	case 0x23: // INC HL
+		// M2
+		gb.Reg.WriteHL(gb.Reg.ReadHL() + 1)
+
+		// M3/M1
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
 	case 0x24: // INC H
 		// M2/M1
 		result, halfCarry, _ := AddUnsigned8(gb.Reg.ReadH(), 1)
@@ -459,8 +539,28 @@ func (gb *GameBoy) ExecuteInstruction() {
 
 	case 0x28:
 		return
-	case 0x29:
-		return
+	case 0x29: // ADD HL, HL
+		// M2
+		result, halfCarry, carry := AddUnsigned8(gb.Reg.ReadL(), gb.Reg.ReadL())
+		gb.Reg.WriteL(result)
+
+		gb.Reg.SetSubstractionFlag(false)
+		gb.Reg.SetHalfCarryFlag(halfCarry)
+		gb.Reg.SetCarryFlag(carry)
+
+		// M3/M1
+		result, halfCarry, carry = AddUnsigned8Carry(gb.Reg.ReadH(), gb.Reg.ReadH(), carry)
+		gb.Reg.WriteH(result)
+
+		gb.Reg.SetSubstractionFlag(false)
+		gb.Reg.SetHalfCarryFlag(halfCarry)
+		gb.Reg.SetCarryFlag(carry)
+
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
 	case 0x2A: // LD A, [HL+]
 		// M2
 		Z := gb.ReadByAddress(gb.Reg.ReadHL())
@@ -473,8 +573,16 @@ func (gb *GameBoy) ExecuteInstruction() {
 		gb.Reg.IncreasePC()
 		gb.Reg.WriteA(Z)
 
-	case 0x2B:
-		return
+	case 0x2B: // DEC HL
+		// M2
+		gb.Reg.WriteHL(gb.Reg.ReadHL() + 1)
+
+		// M3/M1
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
 	case 0x2C: // INC L
 		// M2/M1
 		result, halfCarry, _ := AddUnsigned8(gb.Reg.ReadL(), 1)
@@ -555,8 +663,16 @@ func (gb *GameBoy) ExecuteInstruction() {
 		gb.Reg.IE = interrupt
 		gb.Reg.IncreasePC()
 
-	case 0x33:
-		return
+	case 0x33: // INC SP
+		// M2
+		gb.Reg.WriteSP(gb.Reg.ReadSP() + 1)
+
+		// M3/M1
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
 	case 0x34: // INC [HL]
 		// M2
 		Z := gb.ReadByAddress(gb.Reg.ReadHL())
@@ -616,8 +732,30 @@ func (gb *GameBoy) ExecuteInstruction() {
 
 	case 0x38:
 		return
-	case 0x39:
-		return
+	case 0x39: // ADD HL, SP
+		// M2
+		sp_value := gb.Reg.ReadSP()
+		//
+		result, halfCarry, carry := AddUnsigned8(gb.Reg.ReadL(), uint8(sp_value&0xFF))
+		gb.Reg.WriteL(result)
+
+		gb.Reg.SetSubstractionFlag(false)
+		gb.Reg.SetHalfCarryFlag(halfCarry)
+		gb.Reg.SetCarryFlag(carry)
+
+		// M3/M1
+		result, halfCarry, carry = AddUnsigned8Carry(gb.Reg.ReadH(), uint8(sp_value>>8), carry)
+		gb.Reg.WriteH(result)
+
+		gb.Reg.SetSubstractionFlag(false)
+		gb.Reg.SetHalfCarryFlag(halfCarry)
+		gb.Reg.SetCarryFlag(carry)
+
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
 	case 0x3A: // LD A, [HL-]
 		// M2
 		Z := gb.ReadByAddress(gb.Reg.ReadHL())
@@ -630,8 +768,16 @@ func (gb *GameBoy) ExecuteInstruction() {
 		gb.Reg.IncreasePC()
 		gb.Reg.WriteA(Z)
 
-	case 0x3B:
-		return
+	case 0x3B: // DEC SP
+		// M2
+		gb.Reg.WriteSP(gb.Reg.ReadSP() + 1)
+
+		// M3/M1
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
 	case 0x3C: // INC A
 		// M2/M1
 		result, halfCarry, _ := AddUnsigned8(gb.Reg.ReadA(), 1)
@@ -2456,7 +2602,38 @@ func (gb *GameBoy) ExecuteInstruction() {
 		gb.Reg.IncreasePC()
 
 	case 0xE7:
-	case 0xE8:
+	case 0xE8: // ADD SP, e
+		// M2
+		Z := gb.ReadByAddress(gb.Reg.ReadPC())
+		gb.Reg.IncreasePC()
+
+		// M3
+		sp_value := gb.Reg.ReadSP()
+		result, halfCarry, carry := AddUnsigned8(uint8(sp_value & 0xFF), Z)
+		Z = result
+		
+		gb.Reg.SetZeroFlag(false)
+		gb.Reg.SetSubstractionFlag(false)
+		gb.Reg.SetHalfCarryFlag(halfCarry)
+		gb.Reg.SetCarryFlag(carry)
+
+		// M4
+		result = uint8(sp_value >> 8) // MSB
+		if (Z >> 7) == 0b1 {
+			result = result + 0xFF
+		}
+		if gb.Reg.ReadCarryFlag() {
+			result = result + 0b1
+		}
+		
+		// M5/M1
+		opcode, interrupt := gb.FetchCycle(gb.Reg.PC)
+		gb.Reg.IR = opcode
+		gb.Reg.IE = interrupt
+		gb.Reg.IncreasePC()
+
+		gb.Reg.WriteSP((uint16(result) << 8) | uint16(Z))
+		
 	case 0xE9:
 	case 0xEA: // LD (nn), A
 		// M2
